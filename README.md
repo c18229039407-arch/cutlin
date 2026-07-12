@@ -4,116 +4,79 @@
 
 <h1 align="center">Cutlin</h1>
 
-<p align="center"><strong>The first open-source, agentic video production system.</strong></p>
-
-<p align="center">
-  <a href="#start-from-a-video-you-already-love">Paste A Video</a> &nbsp;·&nbsp;
-  <a href="#quick-start">Quick Start</a> &nbsp;·&nbsp;
-  <a href="#try-these-prompts">Try These Prompts</a> &nbsp;·&nbsp;
-  <a href="#pipelines">Pipelines</a> &nbsp;·&nbsp;
-  <a href="#how-it-works">How It Works</a> &nbsp;·&nbsp;
-  <a href="docs/PROVIDERS.md">Providers</a> &nbsp;·&nbsp;
-  <a href="docs/PR_REVIEW_GUIDE.md">Review Guide</a> &nbsp;·&nbsp;
-  <a href="AGENT_GUIDE.md">Agent Guide</a>
-</p>
-
-<p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-blue.svg" alt="License"></a>
-</p>
+<p align="center">简体中文 · <a href="README_en.md">English</a></p>
 
 
 ---
 
-Turn your AI coding assistant into a full video production studio. Describe what you want in plain language — your agent handles research, scripting, asset generation, editing, and final composition.
+将您的 AI 编程助手变成一个完整的视频制作工作室。用通俗的语言描述您的需求——您的智能体会自动处理研究、脚本编写、资产生成、剪辑以及最终合成。
 
-**Important distinction:** Cutlin can make image-based videos, but it can also make a real **video video** for free/open-source workflows: the agent builds a corpus from free stock footage and open archives, retrieves actual motion clips, edits them into a timeline, and renders a finished piece. That is not the usual "animate a handful of stills and call it video" trick.
+**重要的区别：** Cutlin 可以制作基于图像生成的视频，但它也能为免费/开源工作流制作真正的**原生视频（video video）**：智能体会从免费的免版税素材和开源档案中建立语料库，检索实际的动态画面，将它们剪辑到时间线中，并渲染出成品。这绝非通常那种“让几张静态图片动起来就称为视频”的把戏。
 
-## Technical Showcase
+## 技术展示
 
-Cutlin is not a wrapper around one video API — it is a full production system with quality enforcement at every stage.
+Cutlin 不是某个视频 API 的简单封装，而是一套在每个阶段都有质量强制校验的完整生产系统。
 
-**Pipeline architecture.** Every production flows through a staged pipeline with checkpoints and approval gates:
+**流水线架构。** 每次生产都经过带检查点与审批门禁的分阶段流水线：
 
 ```
- idea ──▶ research ──▶ script ──▶ scene plan ──▶ assets ──▶ compose ──▶ QA ──▶ render
-   │          │           │            │            │           │        │
-   └──────────┴───────────┴────────────┴────────────┴───────────┴────────┘
-              checkpoints · decision logs · cost snapshots · approval gates
+ 创意 ──▶ 调研 ──▶ 脚本 ──▶ 场景规划 ──▶ 素材生成 ──▶ 合成 ──▶ QA ──▶ 渲染
+   │        │        │          │            │          │       │
+   └────────┴────────┴──────────┴────────────┴──────────┴───────┘
+          检查点 · 决策日志 · 成本快照 · 审批门禁
 ```
 
-**Multi-provider orchestration.** Image, video, voice, and music providers are scored across 7 dimensions (quality, cost, latency, style fit, availability, license, consistency) with an auditable decision log — the system picks the right tool per shot, not per project.
+**多供应商编排。** 图像、视频、语音、音乐供应商按 7 个维度（质量、成本、延迟、风格匹配、可用性、许可、一致性）打分，附带可审计的决策日志 — 系统按镜头选择工具，而不是按项目一刀切。
 
-**Composition engines.** Three rendering paths, selected per production:
+**三条合成引擎路径，按生产需求选择：**
 
-| Engine | Best for | Cost profile |
+| 引擎 | 适用场景 | 成本区间 |
 |---|---|---|
-| Remotion composition | data-driven scenes, captions, motion graphics | free (local render) |
-| Image animation (Ken Burns / parallax / particles) | stills-to-motion, anime & editorial styles | ~$0.02–$0.15 per video |
-| Generated motion clips (Veo / Kling / MiniMax / local Wan) | true motion, cinematic shots | ~$0.70–$3 per video |
+| Remotion 合成 | 数据驱动场景、字幕、动态图形 | 免费（本地渲染） |
+| 静帧动画（Ken Burns / 视差 / 粒子） | 静图转动态、动漫与编辑风格 | 每条约 $0.02–$0.15 |
+| 生成式动态片段（Veo / Kling / MiniMax / 本地 Wan） | 真实运动镜头、电影感画面 | 每条约 $0.70–$3 |
 
-**Self-review before you see anything.** ffprobe validation, frame sampling, audio level analysis, delivery-promise verification, and subtitle checks run automatically on every render.
+**渲染前自审。** ffprobe 校验、抽帧检查、音频电平分析、交付承诺核验、字幕检查在每次渲染时自动运行。
 
-**Zero-key baseline.** With no API keys at all, the free path still works: stock footage corpus retrieval, timeline editing, local Remotion render.
+**零 Key 基线。** 完全不配置 API Key 时，免费路径依然可用：素材库检索、时间线剪辑、本地 Remotion 渲染。
 
 ---
 
-## Start From A Video You Already Love
+## 从您已经喜欢的视频开始
 
-Starting from a reference video is often faster than starting from a blank prompt.
+从参考视频开始通常比从空白提示词开始要快得多。
 
-Cutlin can start from a **YouTube video, Short, Reel, TikTok, or local clip** and turn it into a grounded production plan:
+Cutlin 可以从 **YouTube 视频、Short、Reel、TikTok 或本地片段**开始，并将其转化为切实可行的制作计划：
 
-1. **Paste a reference video**
-2. **The agent analyzes transcript, pacing, scenes, keyframes, and style**
-3. **You get 2-3 differentiated concepts, an honest tool path, cost estimates, and a sample before full production**
+1. **粘贴参考视频**
+2. **智能体会分析文案、节奏、场景、关键帧和风格**
+3. **在全面制作之前，您会获得 2-3 个差异化的概念、诚实的工具路径、成本估算和样本**
 
 ```text
-"Here's a YouTube Short I love. Make me something like this, but about quantum computing."
+"这是一个我非常喜欢的 YouTube Short 视频。请给我制作一个类似的，但主题是关于量子计算的。"
 ```
 
-What you get back is not "best guess prompt spaghetti." You get:
+您得到的回复绝非“盲目猜测的乱炖提示词”。您将得到：
 
-- **What it keeps** from the reference: pacing, hook style, structure, tone
-- **What it changes**: topic, visual treatment, angle, narration approach
-- **What it will cost** at your target duration, before asset generation starts
-- **What it will actually look like** with your currently available tools
+- 从参考视频中**保留了什么**：节奏、钩子（hook）风格、结构、基调
+- **改变了什么**：主题、视觉处理、角度、旁白方式
+- 在您的目标时长下，资产生成开始前**预估成本是多少**
+- 使用您当前可用的工具**实际渲染效果会是什么样**
 
-Works with **Claude Code, Cursor, Copilot, Windsurf, Codex** — any AI coding assistant that can read files and run code.
+完美兼容 **Claude Code、Cursor、Copilot、Windsurf、Codex** — 任何能够读取文件并运行代码的 AI 编程助手。
 
 ---
 
-## Watch It Happen — The Backlot Living Storyboard
+## 快速开始
 
-Chat tells you what the agent *said*. **Backlot shows you what the production is actually doing** — a local board that fills itself in as the pipeline runs. Stages light up, the script lands as a screenplay page, scene cards shimmer while assets generate, and every provider decision and dollar spent is on the wall.
-
-When a production starts, the agent opens it for you automatically. No setup, no reporting — the board derives everything from the project files the pipeline already writes.
-
-**The storyboard is now a real approval gate.** Asset generation pauses on a scene-by-scene contact sheet — takes, prompts, per-asset cost, quality scores — so you approve the visuals *before* the render, not after it's too late:
-
-Creative gates hold until you answer. The board shows what's waiting and why; you reply in chat:
-
-Every production on your machine, live-first, in the library:
-
-```bash
-python -m backlot open                  # the library — every project on disk
-python -m backlot open <project-id>     # one production's live board
-python scripts/backlot_simulate_run.py  # no production yet? watch a simulated one live
-```
-
-And when a run is done, hit **▶ REPLAY RUN** — the whole production replays from its timestamps, scrubbable end to end. See [`backlot/README.md`](backlot/README.md) for how it works.
-
----
-
-## Quick Start
-
-### Prerequisites
+### 必备条件
 
 - **Python 3.10+** — [python.org](https://www.python.org/downloads/)
 - **FFmpeg** — `brew install ffmpeg` / `sudo apt install ffmpeg` / [ffmpeg.org](https://ffmpeg.org/download.html)
 - **Node.js 18+** — [nodejs.org](https://nodejs.org/)
-- **An AI coding assistant** — Claude Code, Cursor, Copilot, Windsurf, or Codex
+- **一款 AI 编程助手** — Claude Code、Cursor、Copilot、Windsurf 或 Codex
 
-### Install & Run
+### 安装与运行
 
 ```bash
 git clone https://github.com/c18229039407-arch/cutlin.git
@@ -121,482 +84,481 @@ cd Cutlin
 make setup
 ```
 
-Open the project in your AI coding assistant and tell it what you want:
+在您的 AI 编程助手中打开该项目，然后告诉它您的需求：
 
 ```
-"Make a 60-second animated explainer about how neural networks learn"
+"制作一个 60 秒的动画解说视频，讲解神经网络是如何学习的"
 ```
 
-Or if you want the real-footage path:
+或者如果您想使用真实素材的路径：
 
 ```text
-"Make a 75-second documentary montage about city life in the rain. Use real footage only, no narration, elegiac tone, with music."
+"制作一部 75 秒的纪录片蒙太奇，展现雨中的城市生活。只使用真实素材，无旁白，需要一种挽歌般的基调和配乐。"
 ```
 
-That's it. The agent researches your topic with live web search, generates AI images, writes and narrates the script with voice direction, finds royalty-free background music automatically, burns in word-level subtitles, and renders the final video. Before you see anything, the system runs a multi-point self-review — ffprobe validation, frame sampling, audio level analysis, delivery promise verification, and subtitle checks. Every provider selection is scored across 7 dimensions with an auditable decision log. Every creative decision gets your approval.
+就是这么简单。智能体会通过实时网络搜索研究您的主题，生成 AI 图像，撰写并配音带有语音指导的脚本，自动寻找免版税的背景音乐，烧录词级字幕，并渲染最终视频。在您看到任何内容之前，系统会运行多点自我审查——ffprobe 验证、帧采样、音频电平分析、交付承诺验证以及字幕检查。每一个提供商的选择都会在 7 个维度上进行评分，并附有可审计的决策日志。每一个创意决定都需要您的批准。
 
-> **No `make`?** macOS/Linux: `python3 -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt && cd remotion-composer && npm install && cd .. && python -m pip install piper-tts && cp .env.example .env`
+> **没有 `make`？** macOS/Linux：`python3 -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt && cd remotion-composer && npm install && cd .. && python -m pip install piper-tts && cp .env.example .env`
 >
-> Windows PowerShell: `py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`
+> Windows PowerShell：`py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`
 >
-> **Windows:** If `npm install` fails with `ERR_INVALID_ARG_TYPE`, use `npx --yes npm install` instead.
+> **Windows:** 如果 `npm install` 报错 `ERR_INVALID_ARG_TYPE`，请改用 `npx --yes npm install`。
 
-### If You're An OpenClaw Agent Reading This, Congratulations: You Probably Passed The Turing Test
+### 如果你是正在阅读本文的 OpenClaw 智能体，恭喜你：你可能通过了图灵测试
 
-This repo is built for agentic operation. If you're an OpenClaw-style agent, here is the shortest path to becoming useful fast:
+本仓库专为智能体（Agent）操作而构建。如果您是 OpenClaw 风格的智能体，以下是快速发挥作用的最短路径：
 
-1. **Read the contract first**
-   Start with [`AGENT_GUIDE.md`](AGENT_GUIDE.md), then [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
-2. **Do not improvise the production workflow**
-   Cutlin is pipeline-driven. Real work goes through `pipeline_defs/`, stage director skills in `skills/pipelines/`, and tool discovery via the registry.
-3. **Check the actual capability envelope**
-   Run:
+1. **首先阅读契约**
+   从 [`AGENT_GUIDE.md`](AGENT_GUIDE.md) 开始，然后是 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md)。
+2. **不要擅自虚构制作工作流**
+   Cutlin 是流水线驱动的。实际工作通过 `pipeline_defs/` 进行，阶段导演技能在 `skills/pipelines/` 中，工具发现通过 registry（注册表）完成。
+3. **检查实际的能力范围**
+   运行：
    ```bash
    python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.support_envelope(), indent=2))"
    python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.provider_menu(), indent=2))"
    ```
-4. **Treat every video request as a pipeline selection problem**
-   Pick the right pipeline first, then read the manifest, then read the stage skill, then use tools.
+4. **将每个视频请求视为一个流水线选择问题**
+   首先选择正确的流水线，然后阅读清单（manifest），接着阅读阶段技能（stage skill），最后再使用工具。
 
-### Add API Keys (optional — more keys = more tools)
+### 添加 API 密钥（可选 — 密钥越多 = 工具越多）
 
 ```bash
-# .env — every key is optional, add what you have
+# .env — 每个密钥都是可选的，只需添加您拥有的即可
 
-# Image + video gateway:
-FAL_KEY=your-key               # FLUX images + Google Veo, Kling, MiniMax video + Recraft images
+# 图像 + 视频网关:
+FAL_KEY=your-key               # FLUX 图像 + Google Veo、Kling、MiniMax 视频 + Recraft 图像
 
-# Free stock media:
-PEXELS_API_KEY=your-key        # Free stock footage and images
-PIXABAY_API_KEY=your-key       # Free stock footage and images
-UNSPLASH_ACCESS_KEY=your-key   # Free stock images
+# 免费素材库:
+PEXELS_API_KEY=your-key        # 免费库存视频和图像
+PIXABAY_API_KEY=your-key       # 免费库存视频和图像
+UNSPLASH_ACCESS_KEY=your-key   # 免费库存图像
 
-# Music:
-SUNO_API_KEY=your-key          # Full songs, instrumentals, any genre
+# 音乐:
+SUNO_API_KEY=your-key          # 完整的歌曲、伴奏，涵盖任何流派
 
-# Voice & images:
-ELEVENLABS_API_KEY=your-key    # Premium TTS, AI music, sound effects
-OPENAI_API_KEY=your-key        # OpenAI TTS, GPT Image 2 images
-XAI_API_KEY=your-key           # xAI Grok image edits/generation + Grok video generation
-GOOGLE_API_KEY=your-key        # Google Imagen images, Google TTS (700+ voices)
+# 语音与图像:
+ELEVENLABS_API_KEY=your-key    # 顶级 TTS、AI 音乐、音效
+OPENAI_API_KEY=your-key        # OpenAI TTS、GPT Image 2 图像
+XAI_API_KEY=your-key           # xAI Grok 图像编辑/生成 + Grok 视频生成
+GOOGLE_API_KEY=your-key        # Google Imagen 图像、Google TTS（700+ 种声音）
 
-# More video providers:
-HEYGEN_API_KEY=your-key        # HeyGen — VEO, Sora, Runway, Kling via single gateway
-RUNWAY_API_KEY=your-key        # Runway Gen-4 direct
+# 更多视频提供商:
+HEYGEN_API_KEY=your-key        # HeyGen — 汇集 VEO、Sora、Runway、Kling 的统一网关
+RUNWAY_API_KEY=your-key        # Runway Gen-4 直连
 ```
 
 <details>
-<summary><strong>Have a GPU? Unlock free local video generation</strong></summary>
+<summary><strong>有 GPU 吗？解锁免费的本地视频生成</strong></summary>
 
 ```bash
 make install-gpu
 
-# Then add to .env:
+# 然后添加到 .env:
 VIDEO_GEN_LOCAL_ENABLED=true
-VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # or wan2.1-14b, hunyuan-1.5, ltx2-local, cogvideo-5b
+VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # 或 wan2.1-14b, hunyuan-1.5, ltx2-local, cogvideo-5b
 ```
 
 </details>
 
 ---
 
-## What You Get With Zero API Keys
+## 零 API 密钥的体验
 
-You don't need paid API keys to make real videos. Out of the box, `make setup` gives you:
+您不需要付费 API 密钥就能制作出真正的视频。开箱即用的 `make setup` 会为您提供：
 
-| Capability | Free Tool | What It Does |
+| 能力 | 免费工具 | 功能 |
 |-----------|-----------|-------------|
-| **Narration** | Piper TTS | Free offline text-to-speech — real human-sounding narration |
-| **Open footage** | Archive.org + NASA + Wikimedia Commons | Free/open archival footage, educational media, and documentary texture |
-| **Extra stock** | Pexels + Unsplash + Pixabay | Free stock footage/images (developer keys are free to get) |
-| **Composition (React)** | Remotion | React-based rendering — spring-animated image scenes, text cards, stat cards, charts, TikTok-style word-level captions, TalkingHead |
-| **Composition (HTML/GSAP)** | HyperFrames | HTML/CSS/GSAP rendering — kinetic typography, product promos, launch reels, registry blocks, website-to-video, rigged SVG character animation |
-| **Post-production** | FFmpeg | Encoding, subtitle burn-in, audio mixing, color grading |
-| **Subtitles** | Built-in | Auto-generated captions with word-level timing |
+| **旁白配音** | Piper TTS | 免费离线文本转语音 — 逼真的真人发音旁白 |
+| **开源影像素材** | Archive.org + NASA + Wikimedia Commons | 免费/开源档案影像、教育媒体及纪录片素材 |
+| **额外素材库** | Pexels + Unsplash + Pixabay | 免费库存影像/图片（开发者密钥可免费获取） |
+| **合成 (React)** | Remotion | 基于 React 的渲染 — 带弹簧动画的图片场景、文字卡片、数据卡片、图表、TikTok 风格词级字幕、数字人开口说话 (TalkingHead) |
+| **合成 (HTML/GSAP)** | HyperFrames | HTML/CSS/GSAP 渲染 — 动态排版、产品宣传、发布短片、注册区块、网站转视频、绑定好的 SVG 角色动画 |
+| **后期制作** | FFmpeg | 编码、字幕烧录、音频混合、色彩调色 |
+| **字幕生成** | 内置 | 带有词级时间轴的自动生成字幕 |
 
-Cutlin picks between Remotion and HyperFrames at proposal time (locked as `render_runtime`). Remotion is the default for data-driven explainers and anything using the existing React scene stack; HyperFrames is the default for motion-graphics-heavy briefs that express naturally as HTML + GSAP, including the `character-animation` pipeline's SVG/GSAP rig output. See `skills/core/hyperframes.md` for the full decision matrix.
+Cutlin 会在提案阶段在 Remotion 和 HyperFrames 之间进行选择（锁定为 `render_runtime`）。Remotion 是数据驱动解说和任何使用现有 React 场景堆栈内容的默认选择；HyperFrames 则是大量使用动态图形且更自然表达为 HTML + GSAP 的需求的默认选择，包括 `character-animation` 流水线的 SVG/GSAP 绑定输出。详见 `skills/core/hyperframes.md` 了解完整的决策矩阵。
 
-**Two free-ish paths:**
+**两条近乎免费的路径：**
 
-- **Image-based video:** Piper narrates your script, images provide the visuals, and Remotion animates them into a polished edit.
-- **Local character animation:** SVG rigs, pose libraries, GSAP timelines, and HyperFrames render cartoon character acting to `projects/<project-name>/renders/final.mp4`.
-- **Real-footage video:** the documentary montage pipeline builds a CLIP-searchable corpus from Archive.org, NASA, Wikimedia Commons, and optional free-key sources like Pexels and Unsplash, then cuts together actual motion footage into a finished video.
+- **基于图像的视频：** Piper 为您的脚本配音，图像提供视觉效果，而 Remotion 将其动画化为精心打磨的剪辑。
+- **本地角色动画：** SVG 绑定、姿势库、GSAP 时间线以及 HyperFrames 会渲染卡通角色表演，输出到 `projects/<project-name>/renders/final.mp4`。
+- **真实素材视频：** 纪录片蒙太奇流水线从 Archive.org、NASA、Wikimedia Commons 和可选的免费源（如 Pexels 和 Unsplash）构建支持 CLIP 检索的语料库，然后将实际的动态影像剪辑成一部完整的视频。
 
-If you want the second one, prompt for a **documentary montage**, **tone poem**, or **stock-footage collage**, and explicitly say **use real footage only**.
-
----
-
-## Try These Prompts
-
-Copy any of these into your AI coding assistant after setup. Each one runs a full production pipeline.
-
-### Start from a reference video
-
-> "Here's a YouTube short I love. Make me something like this, but about CRISPR for high school students."
-
-> "Analyze this Reel and give me 3 original variants I could make for my own product launch."
-
-> "I like the pacing and hook in this video. Keep that energy, but turn it into a 45-second explainer about black holes."
-
-### Zero keys needed
-
-> "Make a 45-second animated explainer about why the sky is blue"
-
-> "Create a 60-second video about the history of the internet, with narration and captions"
-
-> "Make a data-driven explainer about coffee consumption around the world"
-
-### Free real-footage documentary path
-
-> "Make a 90-second documentary montage about what a city feels like at 4am. Use real footage only, no narration, elegiac tone."
-
-> "Create a 60-second Adam-Curtis-style archival collage about 1950s consumer optimism. Prefer Archive.org and Wikimedia footage."
-
-> "Cut together a dreamlike montage about coming home in the rain using real stock footage only. Music yes, narration no."
-
-### With an image/video provider configured (~$0.15–$1.50)
-
-> "Create a 30-second Ghibli-style animated video of a magical floating library in the clouds at golden hour"
-
-> "Make a 30-second anime-style animation of an underwater temple with bioluminescent coral and ancient ruins"
-
-> "Create an animated explainer about how CRISPR gene editing works, using AI-generated visuals"
-
-> "Make a product launch teaser for a fictional smart water bottle called AquaPulse"
-
-### Full setup (~$1–$3)
-
-> "Create a cinematic 30-second trailer for a sci-fi concept: humanity receives a warning from 1000 years in the future"
-
-> "Make a 90-second animated explainer about quantum computing for middle school students, with a fun narrator voice and custom soundtrack"
-
-Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render zero-key demo videos instantly.
+如果您想要第二种（真实素材）路径，请在提示词中要求制作**纪录片蒙太奇 (documentary montage)**、**音画诗 (tone poem)** 或**素材库拼贴 (stock-footage collage)**，并明确说明**只使用真实素材 (use real footage only)**。
 
 ---
 
-## Pipelines
+## 尝试这些提示词
 
-Each pipeline is a complete production workflow, from idea to finished video.
+设置完成后，将以下任何内容复制到您的 AI 编程助手中。每条指令都会运行一个完整的制作流水线。
 
-| Pipeline | What It Produces | Best For |
+### 从参考视频开始
+
+> "Here's a YouTube short I love. Make me something like this, but about CRISPR for high school students."（这是一个我非常喜欢的 YouTube 短片。请给我制作一个类似的视频，但主题是面向高中生的 CRISPR 基因编辑技术。）
+
+> "Analyze this Reel and give me 3 original variants I could make for my own product launch."（分析这个 Reel 视频并给我 3 个原创变体，我可以用它来发布我自己的产品。）
+
+> "I like the pacing and hook in this video. Keep that energy, but turn it into a 45-second explainer about black holes."（我喜欢这个视频的节奏和钩子。保持这种能量，但把它变成一个 45 秒的关于黑洞的解说视频。）
+
+### 零密钥需求
+
+> "Make a 45-second animated explainer about why the sky is blue"（制作一个 45 秒的动画解说视频，解释为什么天空是蓝色的）
+
+> "Create a 60-second video about the history of the internet, with narration and captions"（制作一个 60 秒关于互联网历史的视频，包含旁白和字幕）
+
+> "Make a data-driven explainer about coffee consumption around the world"（制作一个关于全球咖啡消费情况的数据驱动型解说视频）
+
+### 免费的真实素材纪录片路径
+
+> "Make a 90-second documentary montage about what a city feels like at 4am. Use real footage only, no narration, elegiac tone."（制作一部 90 秒的纪录片蒙太奇，展现凌晨 4 点城市的感觉。只使用真实素材，无旁白，挽歌般的基调。）
+
+> "Create a 60-second Adam-Curtis-style archival collage about 1950s consumer optimism. Prefer Archive.org and Wikimedia footage."（制作一部 60 秒 Adam Curtis 风格的档案拼贴画，探讨 20 世纪 50 年代的消费乐观主义。优先使用 Archive.org 和 Wikimedia 的素材。）
+
+> "Cut together a dreamlike montage about coming home in the rain using real stock footage only. Music yes, narration no."（用纯真实素材剪辑一个关于雨中归家的梦幻般蒙太奇。需要音乐，不需要旁白。）
+
+### 配置了图像/视频提供商 (~0.15 美元–1.50 美元)
+
+> "Create a 30-second Ghibli-style animated video of a magical floating library in the clouds at golden hour"（制作一部 30 秒的吉卜力风格动画视频，展示黄金时刻云端上一座神奇的漂浮图书馆）
+
+> "Make a 30-second anime-style animation of an underwater temple with bioluminescent coral and ancient ruins"（制作一部 30 秒动漫风格的水下神庙动画，内含发光珊瑚和古代遗迹）
+
+> "Create an animated explainer about how CRISPR gene editing works, using AI-generated visuals"（使用 AI 生成视觉效果，制作一部关于 CRISPR 基因编辑原理的动画解说视频）
+
+> "Make a product launch teaser for a fictional smart water bottle called AquaPulse"（为一款虚构的名为 AquaPulse 的智能水瓶制作一个产品发布预告片）
+
+### 完整设置 (~1 美元–3 美元)
+
+> "Create a cinematic 30-second trailer for a sci-fi concept: humanity receives a warning from 1000 years in the future"（为一个科幻概念制作一部 30 秒的电影级预告片：人类收到了来自 1000 年后的警告）
+
+> "Make a 90-second animated explainer about quantum computing for middle school students, with a fun narrator voice and custom soundtrack"（制作一部面向中学生的 90 秒量子计算动画解说视频，配有有趣的旁白声音和定制的背景音乐）
+
+想了解更多？查看完整的 **[提示词画廊](PROMPT_GALLERY.md)** 获取经过测试的提示词、预期成本和输出示例，或者运行 `make demo` 立即渲染零密钥的演示视频。
+
+---
+
+## 流水线
+
+每条流水线都是一个完整的制作工作流，从创意直到成品视频。
+
+| 流水线 | 产出内容 | 最适用场景 |
 |----------|-----------------|----------|
-| **Animated Explainer** | AI-generated explainer with research, narration, visuals, music | Educational content, tutorials, topic breakdowns |
-| **Animation** | Motion graphics, kinetic typography, animated sequences | Social media, product demos, abstract concepts |
-| **Avatar Spokesperson** | Avatar-driven presenter videos | Corporate comms, training, announcements |
-| **Cinematic** | Trailer, teaser, and mood-driven edits | Brand films, teasers, promotional content |
-| **Clip Factory** | Batch of ranked short-form clips from one long source | Repurposing long content for social media |
-| **Documentary Montage** | Thematic montage cut from a CLIP-indexed corpus of free stock footage and open archives (Pexels, Archive.org, NASA, Wikimedia, Unsplash) | Video essays, mood pieces, retrieval-first B-roll edits, real-footage videos without paid generation APIs |
-| **Hybrid** | Source footage + AI-generated support visuals | Enhancing existing footage with graphics |
-| **Localization & Dub** | Subtitle, dub, and translate existing video | Multi-language distribution |
-| **Podcast Repurpose** | Podcast highlights to video | Podcast marketing, audiogram videos |
-| **Screen Demo** | Polished software screen recordings and walkthroughs | Product demos, tutorials, documentation |
-| **Talking Head** | Footage-led speaker videos | Presentations, vlogs, interviews |
+| **动画解说 (Animated Explainer)** | 包含研究、旁白、视觉效果、音乐的 AI 生成解说 | 教育内容、教程、主题解析 |
+| **动画 (Animation)** | 动态图形、动态排版、动画序列 | 社交媒体、产品演示、抽象概念 |
+| **化身代言 (Avatar Spokesperson)** | 数字人驱动的演讲者视频 | 企业通讯、培训、公告 |
+| **电影级 (Cinematic)** | 预告片、前导片、基于情绪的剪辑 | 品牌宣传片、前导预告、促销内容 |
+| **片段工厂 (Clip Factory)** | 从单一长素材中批量生成经过排名的短视频片段 | 将长内容重制为社交媒体短片 |
+| **纪录片蒙太奇 (Documentary Montage)** | 从通过 CLIP 索引的免费影像库和开放档案（Pexels、Archive.org、NASA、Wikimedia、Unsplash）中剪辑出的主题蒙太奇 | 视频随笔、情绪化短片、检索优先的空镜头剪辑、无付费视频生成 API 的真实素材视频 |
+| **混合 (Hybrid)** | 源素材 + AI 生成的辅助视觉效果 | 使用图形增强现有画面 |
+| **本地化与配音 (Localization & Dub)** | 为现有视频添加字幕、配音并翻译 | 多语言分发 |
+| **播客重制 (Podcast Repurpose)** | 将播客精彩片段转化为视频 | 播客营销、音频可视化视频 |
+| **屏幕演示 (Screen Demo)** | 精美打磨的软件屏幕录制和演示 | 产品演示、教程、文档 |
+| **口播 (Talking Head)** | 以真人出镜为主的演讲视频 | 演示文稿、vlog、访谈 |
 
-Every pipeline follows the same structured flow:
+每个流水线都遵循相同的结构化流程：
 
 ```
-research -> proposal -> script -> scene_plan -> assets -> edit -> compose
+研究 -> 提案 -> 脚本 -> 场景规划 -> 资产生成 -> 剪辑 -> 合成
 ```
 
-Each stage has a dedicated **director skill** — a markdown instruction file that teaches the agent exactly how to execute that stage. The agent reads the skill, uses the tools, self-reviews, checkpoints state, and asks for human approval at creative decision points.
+每个阶段都有专门的 **导演技能 (director skill)** — 一个 Markdown 指令文件，指导智能体如何精确执行该阶段。智能体阅读技能、使用工具、自我审查、为状态做检查点，并在创意决定点请求人类批准。
 
-> **Web research is a first-class stage.** Before writing a single word of script, the agent searches YouTube, Reddit, Hacker News, news sites, and academic sources. It gathers data points, audience questions, trending angles, and visual references — then cites everything in a structured research brief. Your videos are grounded in real, current information, not hallucinated facts.
+> **网络研究是一等公民（first-class stage）。** 在写下一句脚本之前，智能体会搜索 YouTube、Reddit、Hacker News、新闻网站和学术资源。它会收集数据点、受众问题、热门角度和视觉参考，然后将所有内容记录在结构化的研究简报中。您的视频将立足于真实、当前的信息，而不是幻觉产生的虚假事实。
 
 ---
 
-## Why Cutlin?
+## 为什么选择 Cutlin？
 
-Most AI video tools give you a single clip from a prompt. Cutlin gives you an **end-to-end production pipeline** — the same structured process a real production team follows, automated by your AI agent.
+大多数 AI 视频工具仅根据提示词提供单一的剪辑片段。Cutlin 为您提供了一个 **端到端的制作流水线** — 就像真实制作团队所遵循的结构化流程一样，由您的 AI 智能体自动完成。
 
-Most "free AI video" stacks quietly mean "animate still images." Cutlin can do that too, but it can also build a finished video from **real footage** pulled from free/open sources, ranked semantically, edited intentionally, and rendered as a proper timeline.
+大多数“免费 AI 视频”技术栈往往暗指“让静态图像动起来”。Cutlin 固然也能做到这一点，但它还能利用从免费/开源获取的**真实素材**制作完整的视频：在语义上对其进行排名，有目的地进行剪辑，并作为正确的时间线渲染输出。
 
-Edit your own talking-head footage. Generate a fully animated explainer from scratch. Cut a 2-hour podcast into a dozen social clips. Translate and dub your content into 10 languages. Build a cinematic brand teaser from stock footage and AI-generated scenes. **If a production team can make it, Cutlin can orchestrate it.**
+剪辑您自己的口播素材。从零开始生成一个完全动画化的解说。将长达 2 小时的播客剪辑成十几个社交短片。将您的内容翻译并配音成 10 种语言。用库存影像和 AI 生成的场景构建电影级品牌预告片。**只要制作团队能做出来的东西，Cutlin 就能编排它。**
 
-- **12 production pipelines** — explainers, talking heads, screen demos, cinematic trailers, animations, podcasts, localization, documentary montages, and more
-- **52 production tools** — spanning video generation, image creation, text-to-speech, music, audio mixing, subtitles, enhancement, and analysis
-- **400+ agent skills** — production skills, pipeline directors, creative techniques, quality checklists, and deep technology knowledge packs that teach the agent how to use every tool like an expert
-- **Reference-driven creation** — paste a video you like and the agent turns it into a grounded, differentiated production plan instead of forcing you to invent the perfect prompt from scratch
-- **Real-footage documentary creation without paid video models** — build actual edited videos from free/open motion footage and archival sources, not just Ken Burns over images
-- **Live web research built in** — before writing a single word of script, the agent runs 15-25+ web searches across YouTube, Reddit, news sites, and academic sources to ground your video in real, current data
-- **Both free/local AND cloud providers** — every capability supports open-source local alternatives alongside premium APIs. Use what you have.
-- **No vendor lock-in** — swap providers freely. The scored selector ranks every provider across 7 dimensions (task fit, output quality, control, reliability, cost efficiency, latency, continuity) and picks the best match automatically.
-- **Production-grade quality gates** — delivery promise enforcement blocks slideshow-looking renders, pre-compose validation catches broken plans before wasting GPU time, and mandatory post-render self-review (ffprobe + frame extraction + audio analysis) ensures the agent never presents garbage. Every provider choice, style decision, and fallback gets logged in an auditable decision trail.
-- **Budget governance built in** — cost estimation before execution, spend caps, per-action approval thresholds. No surprise bills.
-
----
-
-## How It Works
-
-Cutlin uses an **agent-first architecture**. There is no code orchestrator. Your AI coding assistant IS the orchestrator.
-
-```
-You: "Make an explainer video about how black holes form"
- |
- v
-Agent reads pipeline manifest (YAML) -- stages, tools, review criteria, success gates
- |
- v
-Agent reads stage director skill (Markdown) -- HOW to execute each stage
- |
- v
-Agent calls Python tools -- scored provider selection ranks every tool across 7 dimensions
- |
- v
-Agent self-reviews using reviewer skill -- schema validation, playbook compliance, quality checks
- |
- v
-Agent checkpoints state (JSON) -- resumable, with decision log and cost snapshot
- |
- v
-Agent presents for your approval -- you stay in control at every creative decision
- |
- v
-Pre-compose validation gate -- delivery promise, slideshow risk, renderer governance
- |
- v
-Render (Remotion or FFmpeg) -- composition engine matched to visual grammar
- |
- v
-Post-render self-review -- ffprobe, frame extraction, audio analysis, promise verification
- |
- v
-Final video output -- only if self-review passes
-```
-
-**Python provides tools and persistence.** All creative decisions, orchestration logic, review criteria, and quality standards live in readable instruction files (YAML manifests + Markdown skills) that you can inspect and customize. Every decision is logged with alternatives considered, confidence scores, and the reasoning behind each choice.
+- **12 条生产流水线** — 涵盖解说、口播、屏幕演示、电影预告、动画、播客、本地化和纪录片蒙太奇等
+- **52 种生产工具** — 涵盖视频生成、图像创建、文本转语音、音乐、音频混合、字幕、画面增强和分析
+- **400 多项智能体技能** — 制作技能、流水线导演、创意技巧、质量检查表以及深厚的技术知识包，教导智能体如何像专家一样使用每一种工具
+- **参考驱动的创作** — 粘贴您喜欢的视频，智能体会将其转换为脚踏实地的、差异化的制作计划，无需您绞尽脑汁去编撰完美的提示词
+- **无需付费视频模型的真实纪录片创作** — 从免费/开源的动态影像和档案材料中制作真正剪辑过的视频，而不仅仅是在图片上加推拉镜头
+- **内置实时网络研究** — 在撰写脚本前，智能体会对 YouTube、Reddit、新闻和学术站点进行 15-25 次网络检索，确保视频基于真实的最新数据
+- **兼顾免费/本地与云端提供商** — 每一项功能均支持开源的本地替代方案或高级的 API。根据您已有的资源灵活使用。
+- **没有供应商锁定** — 自由切换提供商。系统根据 7 个维度（任务契合度、输出质量、控制功能、可靠性、成本效益、延迟、连续性）对所有提供商打分并自动选择最佳匹配项。
+- **生产级质量关卡** — 交付承诺强制机制拦截类似 PPT 播放效果的渲染；合成前验证检查避免计划崩溃浪费 GPU 算力；渲染后必须执行自我审查（ffprobe + 抽帧 + 音频分析），确保绝不产出垃圾。每一次提供商选择、风格决定和后备方案都会记录在可审计的决策日志中。
+- **内置预算管控** — 执行前进行预估、花费上限和各行动批准阈值设置。没有意外账单。
 
 ---
 
-## Architecture
+## 工作原理
+
+Cutlin 采用 **智能体优先 (agent-first) 的架构**。这里没有代码编排器。您的 AI 编程助手本身就是编排器。
+
+```
+您："制作一个关于黑洞是如何形成的解说视频"
+ |
+ v
+智能体读取流水线清单 (YAML) -- 阶段、工具、审查标准、成功关卡
+ |
+ v
+智能体读取阶段导演技能 (Markdown) -- 如何 (HOW) 执行每个阶段
+ |
+ v
+智能体调用 Python 工具 -- 评分选择器在 7 个维度上对每个工具进行排名
+ |
+ v
+智能体使用审阅者技能进行自我审查 -- Schema 验证、剧本依从性、质量检查
+ |
+ v
+智能体保存状态检查点 (JSON) -- 可恢复，带有决策日志和成本快照
+ |
+ v
+智能体提交等候您的批准 -- 在所有创意决定点保持您的控制权
+ |
+ v
+合成前验证关卡 -- 交付承诺、幻灯片风险检测、渲染器治理
+ |
+ v
+渲染 (Remotion 或 FFmpeg) -- 与视觉语法匹配的合成引擎
+ |
+ v
+渲染后自我审查 -- ffprobe、帧提取、音频分析、承诺验证
+ |
+ v
+最终视频输出 -- 只有通过自我审查才会输出
+```
+
+**Python 提供工具和持久化。** 所有的创意决策、编排逻辑、审查标准和质量标准都存在于可读的指令文件（YAML 清单 + Markdown 技能）中，您可以检查和自定义它们。每一项决定都会被记录，包括考虑过的备选方案、置信度得分以及每次选择背后的推理。
+
+---
+
+## 架构
 
 ```
 Cutlin/
-├── tools/              # 48 Python tools (the agent's hands)
-│   ├── video/          # 13 video gen tools + compose, stitch, trim
-│   ├── audio/          # 4 TTS providers + Suno/ElevenLabs music, mixing, enhancement
-│   ├── graphics/       # 9 image/graphics generation tools + diagrams, code snippets, math
-│   ├── enhancement/    # Upscale, bg remove, face enhance, color grade
-│   ├── analysis/       # Transcription, scene detect, frame sampling
-│   ├── avatar/         # Talking head, lip sync
-│   └── subtitle/       # SRT/VTT generation
+├── tools/              # 48 个 Python 工具（智能体的“手”）
+│   ├── video/          # 13 个视频生成工具 + 合成、拼接、裁剪
+│   ├── audio/          # 4 个 TTS 提供商 + Suno/ElevenLabs 音乐、混合、增强
+│   ├── graphics/       # 9 个图像/图形生成工具 + 图表、代码片段、数学动画
+│   ├── enhancement/    # 放大、背景移除、面部增强、色彩调色
+│   ├── analysis/       # 转录、场景检测、帧采样
+│   ├── avatar/         # 数字人、唇形同步
+│   └── subtitle/       # SRT/VTT 生成
 │
-├── pipeline_defs/      # YAML pipeline manifests (the agent's playbook)
-├── skills/             # Markdown skill files (the agent's knowledge)
-│   ├── pipelines/      # Per-pipeline stage director skills
-│   ├── creative/       # Creative technique skills
-│   ├── core/           # Core tool skills
-│   └── meta/           # Reviewer, checkpoint protocol
+├── pipeline_defs/      # YAML 流水线清单（智能体的“剧本”）
+├── skills/             # Markdown 技能文件（智能体的“知识”）
+│   ├── pipelines/      # 各流水线阶段导演技能
+│   ├── creative/       # 创意技巧技能
+│   ├── core/           # 核心工具技能
+│   └── meta/           # 审阅者、检查点协议
 │
-├── schemas/            # 15 JSON Schemas (contract validation)
-├── styles/             # Visual style playbooks (YAML)
-├── remotion-composer/  # React/Remotion video composition engine
-├── lib/                # Core infrastructure (config, checkpoints, pipeline loader)
-└── tests/              # Contract tests, QA integration tests, eval harness
+├── schemas/            # 15 个 JSON Schemas（契约验证）
+├── styles/             # 视觉风格指导（YAML）
+├── remotion-composer/  # React/Remotion 视频合成引擎
+├── lib/                # 核心基础设施（配置、检查点、流水线加载器）
+└── tests/              # 契约测试、QA 集成测试、评估工具包
 ```
 
-### Three-Layer Knowledge Architecture
+### 三层知识架构
 
 ```
-Layer 1: tools/ + pipeline_defs/     "What exists" — executable capabilities + orchestration
-Layer 2: skills/                     "How to use it" — Cutlin conventions and quality bars
-Layer 3: .agents/skills/             "How it works" — external technology knowledge packs
+第 1 层: tools/ + pipeline_defs/     "存在什么" — 可执行功能 + 编排
+第 2 层: skills/                     "如何使用它" — Cutlin 的约定和质量门槛
+第 3 层: .agents/skills/             "如何工作" — 外部技术知识包
 ```
 
-Each tool declares which Layer 3 skills it relies on. The agent reads Layer 1 to know what's available, Layer 2 to know how Cutlin wants it used, and Layer 3 for deep technical knowledge when needed.
+每个工具都会声明其依赖哪些第 3 层技能。智能体读取第 1 层了解有哪些可用工具，读取第 2 层了解 Cutlin 期望的使用方式，当需要时，读取第 3 层获取深入的技术知识。
 
 ---
 
-## Supported Providers
+## 支持的提供商
 
-> **Full setup guide with pricing and free tiers:** [`docs/PROVIDERS.md`](docs/PROVIDERS.md)
+> **包含定价与免费额度的完整设置指南：** [`docs/PROVIDERS.md`](docs/PROVIDERS.md)
 
 <details>
-<summary><strong>Video Generation — 14 providers</strong></summary>
+<summary><strong>视频生成 — 14 家提供商</strong></summary>
 
-| Provider | Type | Notes |
+| 提供商 | 类型 | 备注 |
 |----------|------|-------|
-| **Kling** | Cloud API | High quality, fast |
-| **Runway Gen-4** | Cloud API | Cinematic quality, Gen-3 Alpha Turbo / Gen-4 Turbo / Gen-4 Aleph |
-| **Google Veo 3** | Cloud API | Long-form, cinematic. Via fal.ai or HeyGen. |
-| **Grok Imagine Video** | Cloud API | Strong reference-image video and xAI-native short-form generation |
-| **Higgsfield** | Cloud API | Multi-model orchestrator with Soul ID for character consistency |
-| **MiniMax** | Cloud API | Cost-effective |
-| **HeyGen** | Cloud API | Multi-model gateway |
-| **WAN 2.1** | Local GPU | Free, 1.3B and 14B variants |
-| **Hunyuan** | Local GPU | Free, high quality |
-| **CogVideo** | Local GPU | Free, 2B and 5B variants |
-| **LTX-Video** | Local GPU / Modal | Free locally, or self-hosted cloud |
-| **Pexels** | Stock | Free stock footage |
-| **Pixabay** | Stock | Free stock footage |
-| **Wikimedia Commons** | Stock | Free/open stock footage and archival video |
+| **Kling** | 云端 API | 高质量，速度快 |
+| **Runway Gen-4** | 云端 API | 电影级质量，Gen-3 Alpha Turbo / Gen-4 Turbo / Gen-4 Aleph |
+| **Google Veo 3** | 云端 API | 长篇幅，电影级。通过 fal.ai 或 HeyGen 接入。 |
+| **Grok Imagine Video** | 云端 API | 强大的基于参考图的视频和 xAI 原生短视频生成 |
+| **Higgsfield** | 云端 API | 带 Soul ID 以实现角色一致性的多模型编排器 |
+| **MiniMax** | 云端 API | 极具成本效益 |
+| **HeyGen** | 云端 API | 多模型网关 |
+| **WAN 2.1** | 本地 GPU | 免费，提供 1.3B 和 14B 版本 |
+| **Hunyuan (混元)** | 本地 GPU | 免费，高质量 |
+| **CogVideo** | 本地 GPU | 免费，提供 2B 和 5B 版本 |
+| **LTX-Video** | 本地 GPU / Modal | 本地免费，或自托管云 |
+| **Pexels** | 素材库 | 免费的库存视频 |
+| **Pixabay** | 素材库 | 免费的库存视频 |
+| **Wikimedia Commons** | 素材库 | 免费/开放的库存视频和档案录像 |
 
 </details>
 
 <details>
-<summary><strong>Image Generation — 10 tools/providers</strong></summary>
+<summary><strong>图像生成 — 10 种工具/提供商</strong></summary>
 
-| Provider | Type | Notes |
+| 提供商 | 类型 | 备注 |
 |----------|------|-------|
-| **FLUX** | Cloud API | State-of-the-art quality |
-| **Google Imagen** | Cloud API | Imagen 4 — high-quality, multiple aspect ratios |
-| **Grok Imagine Image** | Cloud API | Strong image edits, style transfer, and multi-image compositing |
-| **GPT Image 2** | Cloud API | OpenAI's image model |
-| **Recraft** | Cloud API | Design-focused generation |
-| **Local Diffusion** | Local GPU | Stable Diffusion, free |
-| **Pexels** | Stock | Free stock images |
-| **Pixabay** | Stock | Free stock images |
-| **Unsplash** | Stock | Free stock images |
-| **ManimCE** | Local | Mathematical animations |
+| **FLUX** | 云端 API | 业界顶尖质量 |
+| **Google Imagen** | 云端 API | Imagen 4 — 高质量、多种长宽比 |
+| **Grok Imagine Image** | 云端 API | 强大的图像编辑、风格转换和多图合成 |
+| **GPT Image 2** | 云端 API | OpenAI 的图像模型 |
+| **Recraft** | 云端 API | 专注于设计的生成 |
+| **Local Diffusion** | 本地 GPU | Stable Diffusion，免费 |
+| **Pexels** | 素材库 | 免费的库存图片 |
+| **Pixabay** | 素材库 | 免费的库存图片 |
+| **Unsplash** | 素材库 | 免费的库存图片 |
+| **ManimCE** | 本地 | 数学与科学动画 |
 
 </details>
 
 <details>
-<summary><strong>Text-to-Speech — 4 providers</strong></summary>
+<summary><strong>文本转语音 (TTS) — 4 家提供商</strong></summary>
 
-| Provider | Type | Notes |
+| 提供商 | 类型 | 备注 |
 |----------|------|-------|
-| **ElevenLabs** | Cloud API | Premium voice quality |
-| **Google TTS** | Cloud API | 700+ voices, 50+ languages — best for localization |
-| **OpenAI TTS** | Cloud API | Fast, affordable |
-| **Piper** | Local | Completely free, offline |
+| **ElevenLabs** | 云端 API | 顶级的语音质量 |
+| **Google TTS** | 云端 API | 700+ 种声音，50+ 种语言 — 最适合本地化 |
+| **OpenAI TTS** | 云端 API | 快速且价格实惠 |
+| **Piper** | 本地 | 完全免费，支持离线 |
 
 </details>
 
 <details>
-<summary><strong>Music, Sound & Post-Production</strong></summary>
+<summary><strong>音乐、音效与后期制作</strong></summary>
 
-**Music & Sound:**
+**音乐与音效：**
 
-| Provider | Type | Notes |
+| 提供商 | 类型 | 备注 |
 |----------|------|-------|
-| **Suno AI** | Cloud API | Full song generation with vocals, lyrics, any genre. Up to 8 minutes. |
-| **ElevenLabs Music** | Cloud API | AI music generation |
-| **ElevenLabs SFX** | Cloud API | Sound effect generation |
+| **Suno AI** | 云端 API | 生成带人声、歌词的完整歌曲，涵盖所有流派。长达 8 分钟。 |
+| **ElevenLabs Music** | 云端 API | AI 音乐生成 |
+| **ElevenLabs SFX** | 云端 API | 音效生成 |
 
-**Post-Production (always available, always free):**
+**后期制作（始终可用，完全免费）：**
 
-| Tool | What It Does |
+| 工具 | 功能 |
 |------|-------------|
-| **FFmpeg** | Video composition, encoding, subtitle burn-in, audio muxing |
-| **Video Stitch** | Multi-clip assembly, crossfades, picture-in-picture, spatial layouts |
-| **Video Trimmer** | Precision cutting and extraction |
-| **Audio Mixer** | Multi-track mixing, ducking, fades |
-| **Audio Enhance** | Noise reduction, normalization |
-| **Color Grade** | LUT-based color grading |
-| **Subtitle Gen** | SRT/VTT generation from timestamps |
+| **FFmpeg** | 视频合成、编码、字幕烧录、音频混音 |
+| **Video Stitch** | 多片段组装、交叉淡化、画中画、空间布局 |
+| **Video Trimmer** | 精确剪切和提取 |
+| **Audio Mixer** | 多轨混音、闪避处理（ducking）、淡入淡出 |
+| **Audio Enhance** | 降噪、音量标准化 |
+| **Color Grade** | 基于 LUT 的色彩调色 |
+| **Subtitle Gen** | 从时间戳生成 SRT/VTT 文件 |
 
-**Enhancement:**
+**画面增强：**
 
-| Tool | What It Does |
+| 工具 | 功能 |
 |------|-------------|
-| **Upscale** | Real-ESRGAN image/video upscaling |
-| **Background Remove** | rembg / U2Net background removal |
-| **Face Enhance** | Face quality enhancement |
-| **Face Restore** | CodeFormer / GFPGAN face restoration |
+| **Upscale** | Real-ESRGAN 图像/视频放大 |
+| **Background Remove** | rembg / U2Net 移除背景 |
+| **Face Enhance** | 面部质量增强 |
+| **Face Restore** | CodeFormer / GFPGAN 面部修复 |
 
-**Analysis:**
+**分析：**
 
-| Tool | What It Does |
+| 工具 | 功能 |
 |------|-------------|
-| **Transcriber** | WhisperX speech-to-text with word-level timestamps |
-| **Scene Detect** | Automatic scene boundary detection |
-| **Frame Sampler** | Intelligent frame extraction |
-| **Video Understand** | CLIP/BLIP-2 vision-language analysis |
+| **Transcriber** | 带有词级时间戳的 WhisperX 语音转文本 |
+| **Scene Detect** | 自动检测场景边界 |
+| **Frame Sampler** | 智能帧提取 |
+| **Video Understand** | CLIP/BLIP-2 视觉-语言分析 |
 
-**Avatar & Lip Sync:**
+**化身与唇形同步：**
 
-| Tool | What It Does |
+| 工具 | 功能 |
 |------|-------------|
-| **Talking Head** | SadTalker / MuseTalk avatar animation |
-| **Lip Sync** | Wav2Lip audio-driven lip synchronization |
+| **Talking Head** | SadTalker / MuseTalk 数字人动画 |
+| **Lip Sync** | Wav2Lip 音频驱动的唇形同步 |
 
-**Composition & Rendering:**
+**合成与渲染：**
 
-| Engine | Type | What It Does |
+| 引擎 | 类型 | 功能 |
 |--------|------|-------------|
-| **Remotion** | Local (Node.js) | React-based programmatic video — spring-animated image scenes, stat reveals, section titles, hero cards, TikTok-style word-by-word captions, scene transitions (fade/slide/wipe/flip), Google Fonts, audio with fade curves, and the TalkingHead avatar composition. **When no video generation providers are configured, the agent generates still images and Remotion turns them into fully animated video.** |
-| **HyperFrames** | Local (Node.js ≥ 22) | HTML/CSS/GSAP programmatic video — kinetic typography, product promos, launch reels, custom motion graphics, registry blocks (data charts, grain overlays, shader transitions), website-to-video workflows, and rigged SVG character animation. Consumed via `npx hyperframes`; no monorepo checkout needed. |
-| **FFmpeg** | Local | Core video assembly, encoding, subtitle burn, audio muxing, color grading |
+| **Remotion** | 本地 (Node.js) | 基于 React 的编程式视频 — 带有弹簧动画的图片场景、数据揭示、章节标题、展示卡片、TikTok 风格的逐词字幕、场景过渡（淡入淡出/滑动/擦除/翻转）、Google Fonts、带淡化曲线的音频，以及 TalkingHead 虚拟人物合成。**当未配置视频生成提供商时，智能体会生成静态图片并由 Remotion 将它们转化为具有完整动画效果的视频。** |
+| **HyperFrames** | 本地 (Node.js ≥ 22) | 基于 HTML/CSS/GSAP 的编程式视频 — 动态排版、产品宣传片、发布短片、自定义动态图形、注册区块（数据图表、噪点覆盖、着色器过渡）、网站转视频工作流，以及绑定的 SVG 角色动画。通过 `npx hyperframes` 调用；无需拉取整个 monorepo 代码。 |
+| **FFmpeg** | 本地 | 核心视频组装、编码、字幕烧录、音频混音、色彩调色 |
 
-Runtime is chosen at proposal (`render_runtime`) and locked through `edit_decisions`. Silent swaps between runtimes are a governance violation — see `skills/core/hyperframes.md`.
+运行时会在提案阶段选择（`render_runtime`）并通过 `edit_decisions` 锁定。在运行时之间静默切换属于治理违规行为 — 详见 `skills/core/hyperframes.md`。
 
 </details>
 
 ---
 
-## Style System
+## 风格系统
 
-Style playbooks define the visual language for your productions:
+风格剧本 (Style playbooks) 为您的制作定义了视觉语言：
 
-| Playbook | Best For |
+| 剧本 | 最适用场景 |
 |----------|----------|
-| **Clean Professional** | Corporate, educational, SaaS |
-| **Flat Motion Graphics** | Social media, TikTok, startups |
-| **Minimalist Diagram** | Technical deep-dives, architecture |
+| **干净专业 (Clean Professional)** | 企业、教育、SaaS |
+| **扁平动态图形 (Flat Motion Graphics)** | 社交媒体、TikTok、初创公司 |
+| **极简图解 (Minimalist Diagram)** | 技术深度解析、架构 |
 
-Playbooks control typography, color palettes, motion styles, audio profiles, and quality rules. The agent reads the playbook and applies it consistently across all generated assets.
+剧本控制着排版、调色板、运动风格、音频配置和质量规则。智能体读取剧本并将其统一应用到所有生成的资产中。
 
 ---
 
-## Platform Output Profiles
+## 平台输出配置
 
-Built-in render profiles for every major platform:
+为所有主流平台内置的渲染配置：
 
-| Profile | Resolution | Aspect Ratio |
+| 配置 | 分辨率 | 宽高比 |
 |---------|-----------|--------------|
-| YouTube Landscape | 1920x1080 | 16:9 |
+| YouTube 宽屏 (Landscape) | 1920x1080 | 16:9 |
 | YouTube 4K | 3840x2160 | 16:9 |
-| YouTube Shorts | 1080x1920 | 9:16 |
+| YouTube 短片 (Shorts) | 1080x1920 | 9:16 |
 | Instagram Reels | 1080x1920 | 9:16 |
-| Instagram Feed | 1080x1080 | 1:1 |
+| Instagram 动态 (Feed) | 1080x1080 | 1:1 |
 | TikTok | 1080x1920 | 9:16 |
 | LinkedIn | 1920x1080 | 16:9 |
-| Cinematic | 2560x1080 | 21:9 |
+| 电影级 (Cinematic) | 2560x1080 | 21:9 |
 
 ---
 
-## Production Governance
+## 制作治理
 
-Cutlin treats video production like real engineering — with quality gates, audit trails, and enforcement at every stage.
+Cutlin 像对待真正的工程开发一样对待视频制作——在每个阶段都设有质量关卡、审计跟踪和执行控制。
 
-### Quality Gates
+### 质量检验门
 
-- **Human approval gates are enforced, not suggested** — proposal, script, scene plan, generated assets, and publish all pause for your sign-off. The checkpoint writer rejects a "completed" gated stage without recorded approval, and every superseded checkpoint is archived so the audit trail (including gate transitions) survives revisions. Review happens visually on the [Backlot board](#watch-it-happen--the-backlot-living-storyboard).
-- **Pre-compose validation** — blocks render if the delivery promise is violated (e.g. "motion-led" video with 80% still images), slideshow risk score is critical, or renderer family is missing. Catches broken plans before wasting GPU time.
-- **Post-render self-review** — after every render, the runtime runs ffprobe validation, extracts frames at 4 positions to check for black frames and broken overlays, analyzes audio levels for silence and clipping, verifies the delivery promise was honored, and checks subtitle presence. If the review fails, the video is not presented.
-- **Slideshow risk scoring** — 6-dimension analysis (repetition, decorative visuals, weak motion, shot intent, typography overreliance, unsupported cinematic claims) prevents "animated PowerPoint" outputs.
-- **Source media inspection** — when users supply their own footage, the system probes every file (resolution, codec, audio channels, duration) and builds planning implications before a single creative decision is made. No hallucinating content from filenames.
+- **合成前验证** — 如果违反了交付承诺（例如：“以运动为主”的视频却有 80% 是静态图像），幻灯片风险得分处于危急水平，或缺少渲染器族，则阻止渲染。在浪费 GPU 时间之前拦截崩溃的计划。
+- **渲染后自我审查** — 每次渲染后，运行时会运行 ffprobe 验证，在 4 个位置提取帧以检查是否存在黑屏和破损覆盖，分析音频电平是否静音或削峰（clipping），验证是否履行了交付承诺，并检查字幕是否正常。如果审查失败，将不会展示此视频。
+- **PPT 风险评分** — 6 维度分析（重复性、装饰性视觉、运动幅度弱、镜头意图、过度依赖排版、不支持的电影级宣称）防止产生“带动画的 PPT”输出。
+- **源文件检查** — 当用户提供自己的素材时，系统会探查每个文件（分辨率、编解码器、音频通道、时长）并在做出单一创意决策前建立规划预估。不再凭借文件名来虚构内容。
 
-### Scored Provider Selection
+### 基于评分的提供商选择
 
-Every tool selection (video generation, image generation, TTS, music) runs through a 7-dimension scoring engine: task fit (30%), output quality (20%), control features (15%), reliability (15%), cost efficiency (10%), latency (5%), continuity (5%). The winning provider and its score are logged in the decision trail with all alternatives considered.
+所有的工具选择（视频生成、图像生成、TTS、音乐）都要经过一个 7 维度的评分引擎：任务契合度（30%）、输出质量（20%）、控制功能（15%）、可靠性（15%）、成本效益（10%）、延迟（5%）、连续性（5%）。获胜的提供商及其得分将与考虑过的所有备选方案一起被记录在决策跟踪中。
 
-Selectors normalize loose brief context before scoring. If the agent only knows something like "Pixar-style animated short with character consistency," the selector expands that into scorer-friendly intent and style signals instead of requiring a perfectly pre-shaped `task_context`.
+选择器会在打分前对松散的简报上下文进行标准化。如果智能体只知道类似“具有角色一致性的皮克斯风格动画短片”这样的信息，选择器会将其扩展为便于打分的意图和风格信号，而不需要完美预先成型的 `task_context`。
 
-Selector outputs also surface the chosen provider's `agent_skills`, so the agent can immediately read the right Layer 3 provider skill before writing prompts.
+选择器的输出还会展示被选提供商的 `agent_skills`，以便智能体在编写提示词前能立即阅读相关的第 3 层提供商技能。
 
-### Decision Audit Trail
+### 决策审计跟踪
 
-Every major creative and technical choice — provider selection, style/playbook choice, music track, voice selection, renderer family, any fallback or downgrade — is logged with alternatives considered, confidence scores, and reasoning. The cumulative decision log persists across all stages so you can trace exactly why the output looks the way it does.
+每一个重大的创意和技术选择——提供商选择、风格/剧本选择、音乐曲目、声音选择、渲染器族系，以及任何备选方案或降级——都会被记录下来，包含备选项、置信度得分和推理过程。累积的决策日志跨所有阶段持久保存，这样您就能确切追溯为何输出呈现出最终的模样。
 
-### Budget Controls
+### 预算控制
 
-- **Estimate** before execution — see what it will cost
-- **Reserve** budget — lock funds before the call
-- **Reconcile** after — record actual spend
-- **Configurable modes** — `observe` (track only), `warn` (log overruns), `cap` (hard limit)
-- **Per-action approval** — pause for confirmation above a threshold (default: $0.50)
-- **Total budget cap** — default $10, fully configurable
+- 执行前进行**预估** — 查看预计成本
+- **锁定**预算 — 在调用前锁定资金
+- 事后**结算** — 记录实际开销
+- **可配置模式** — `observe` (仅跟踪)、`warn` (超支警告)、`cap` (硬性上限)
+- **按行动审批** — 高于特定阈值（默认：0.50 美元）暂停等待确认
+- **总预算上限** — 默认 10 美元，完全可配置
 
-No surprise bills. The agent tells you what it will cost before it spends.
+没有意外的账单。智能体会在花费之前告诉您需要花多少钱。
 
 ---
 
-## Agent Compatibility
+## 智能体兼容性
 
-Cutlin works with any AI coding assistant that can read files and execute Python. Dedicated instruction files are included for:
+Cutlin 兼容所有能够读取文件并执行 Python 的 AI 编程助手。项目中已包含专用的指令文件：
 
-| Platform | Config File |
+| 平台 | 配置文件 |
 |----------|------------|
 | **Claude Code** | `CLAUDE.md` |
 | **Cursor** | `CURSOR.md` + `.cursor/rules/` |
@@ -604,59 +566,72 @@ Cutlin works with any AI coding assistant that can read files and execute Python
 | **Codex** | `CODEX.md` |
 | **Windsurf** | `.windsurfrules` |
 
-All platform files point to the shared `AGENT_GUIDE.md` (operating guide and agent contract) and `PROJECT_CONTEXT.md` (architecture reference).
+所有平台的指令文件都指向共享的 `AGENT_GUIDE.md`（操作指南和智能体契约）与 `PROJECT_CONTEXT.md`（架构参考）。
 
-> **Coming soon:** Local LLM support via **Ollama** and **LM Studio** — run the full production pipeline without any cloud LLM.
-
----
-
-## Contributing
-
-Cutlin is built to be extended. The two most common contributions:
-
-### Adding a New Tool
-
-1. Create a Python file in the appropriate `tools/` subdirectory
-2. Inherit from `BaseTool` and implement the tool contract
-3. The registry auto-discovers it — no manual registration needed
-4. Add a skill file if the tool needs usage guidance
-
-### Adding a New Pipeline
-
-1. Create a YAML manifest in `pipeline_defs/`
-2. Create stage director skills in `skills/pipelines/<your-pipeline>/`
-3. Reference existing tools — or add new ones if needed
-
-See `docs/ARCHITECTURE.md` for the full technical reference, `docs/PROVIDERS.md` for the complete provider guide (setup, pricing, free tiers), and `AGENT_GUIDE.md` for the agent contract.
-
-### Feedback
-
-
-For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/c18229039407-arch/cutlin/issues).
+> **即将推出：** 借助 **Ollama** 和 **LM Studio** 提供本地 LLM 支持 — 无需任何云端大模型即可运行整个生产流水线。
 
 ---
 
-## Testing
+## 参与贡献
+
+Cutlin 被设计为高度可扩展的。最常见的两种贡献是：
+
+### 添加新工具
+
+1. 在对应的 `tools/` 子目录中创建一个 Python 文件
+2. 继承自 `BaseTool` 并实现工具契约
+3. 注册表会自动发现它 — 无需手动注册
+4. 如果该工具需要使用指导，添加一个对应的技能 (skill) 文件
+
+### 添加新流水线
+
+1. 在 `pipeline_defs/` 中创建一个 YAML 清单
+2. 在 `skills/pipelines/<你的流水线名称>/` 中创建阶段导演技能文件
+3. 引用现有的工具 — 或在需要时添加新工具
+
+详见 `docs/ARCHITECTURE.md` 获取完整的技术参考，`docs/PROVIDERS.md` 查看完整的提供商指南（设置、定价、免费额度），以及 `AGENT_GUIDE.md` 了解智能体契约。
+
+### 加入社区
+
+我们使用 [GitHub Discussions](https://github.com/c18229039407-arch/cutlin/discussions) 来分享作品与想法：
+
+- **[展示与分享](https://github.com/c18229039407-arch/cutlin/discussions/categories/show-and-tell)** — 分享您制作的视频、好用的提示词，或您发现的创意工作流
+- **[想法](https://github.com/c18229039407-arch/cutlin/discussions/categories/ideas)** — 提出新的流水线、工具、风格指南或集成的建议
+- **[问答](https://github.com/c18229039407-arch/cutlin/discussions/categories/q-a)** — 询问有关设置、流水线或故障排除的问题
+
+制作了超酷的内容？发在“展示与分享”里 — 我们非常期待看到您的成果。
+
+---
+
+## 联系方式
+
+
+有关错误反馈、功能请求和工作流讨论，请使用 [GitHub Issues](https://github.com/c18229039407-arch/cutlin/issues) 和 [GitHub Discussions](https://github.com/c18229039407-arch/cutlin/discussions)，以确保每件事都能保持可见和可操作。
+
+---
+
+## 测试
 
 ```bash
-# Run contract tests (no API keys needed)
+# 运行契约测试（无需 API 密钥）
 make test-contracts
 
-# Run all tests
+# 运行所有测试
 make test
 ```
 
 ---
 
-## License
+## 许可证
 
 [GNU AGPLv3](LICENSE)
 
-## Acknowledgements
+## 致谢
 
-Cutlin is a modified fork of [OpenMontage](https://github.com/calesthio/OpenMontage) by calesthio. Thanks to the original authors for their excellent work.
+Cutlin 基于 [OpenMontage](https://github.com/calesthio/OpenMontage)（作者 calesthio）修改而来，感谢原作者的出色工作。
 
 ---
 
-**Cutlin** — Production-grade video with real quality enforcement, orchestrated by your AI assistant.
+**Cutlin** — 拥有真正质量把控、由您的 AI 助手编排的生产级视频制作系统。
 
+如果这个项目对您有帮助，点一个 Star 对我们意义重大 —— 这也能帮助其他人发现它。

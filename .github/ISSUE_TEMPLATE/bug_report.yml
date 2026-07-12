@@ -1,5 +1,5 @@
-name: Bug report
-description: Report a reproducible problem with Cutlin
+name: 缺陷报告
+description: 报告 Cutlin 中可复现的问题
 labels: ["bug"]
 body:
   - type: markdown

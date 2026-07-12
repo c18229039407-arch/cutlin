@@ -25,9 +25,9 @@ let firstPaint = true;
 function renderSlate(s) {
   const board = s.storyboard;
   const chips = [
-    el("span", { class: "chip" }, `${s.pipeline.pipeline_type} pipeline`),
+    el("span", { class: "chip" }, `${s.pipeline.pipeline_type} 流水线`),
     board && board.total_duration_seconds
-      ? el("span", { class: "chip" }, `${board.scenes.length} scenes · ${fmtDuration(board.total_duration_seconds)}`)
+      ? el("span", { class: "chip" }, `${board.scenes.length} 个场景 · ${fmtDuration(board.total_duration_seconds)}`)
       : null,
     s.style_playbook ? el("span", { class: "chip" }, s.style_playbook) : null,
   ];
@@ -37,15 +37,15 @@ function renderSlate(s) {
   const stalled = s.stages.find((x) => x.stalled);
   let liveEl;
   if (awaiting) {
-    liveEl = el("span", { class: "live" }, el("span", { class: "dot" }), "◈ AWAITING YOU");
+    liveEl = el("span", { class: "live" }, el("span", { class: "dot" }), "◈ 等待你审批");
   } else if (stalled) {
     liveEl = el("span", { class: "live", style: "color:var(--red)" },
-      el("span", { class: "dot", style: "background:var(--red);animation:none" }), "⚠ STALLED?");
+      el("span", { class: "dot", style: "background:var(--red);animation:none" }), "⚠ 疑似停滞");
   } else if (s.live || inProgress) {
-    liveEl = el("span", { class: "live" }, el("span", { class: "dot" }), "LIVE");
+    liveEl = el("span", { class: "live" }, el("span", { class: "dot" }), "运行中");
   } else {
     liveEl = el("span", { class: "live idle" }, el("span", { class: "dot" }),
-      `IDLE${s.last_activity ? " · " + fmtAgo(s.last_activity).toUpperCase() : ""}`);
+      `空闲${s.last_activity ? " · " + fmtAgo(s.last_activity).toUpperCase() : ""}`);
   }
 
   const cost = el("div", { class: "cost" });
@@ -61,7 +61,7 @@ function renderSlate(s) {
         class: pct > 90 ? "crit" : pct > 75 ? "warn" : "", style: `width:${pct}%`,
       })));
     }
-    cost.append(el("div", { class: "label" }, "generation spend"));
+    cost.append(el("div", { class: "label" }, "生成花费"));
   }
 
   return el("header", { class: "slate" },
@@ -82,23 +82,31 @@ function renderSlate(s) {
 // ---------------------------------------------------------------------------
 
 function stageSub(st) {
-  if (st.status === "awaiting_human") return "awaiting your approval\nreply in chat to continue";
+  if (st.status === "awaiting_human") return "等待你的审批\n在对话中回复以继续";
   if (st.status === "in_progress" && st.stalled) {
-    return `stalled? no activity for ${st.stalled_minutes}m\nask the agent for status`;
+    return `疑似停滞？已 ${st.stalled_minutes} 分钟无活动\n可向智能体询问状态`;
   }
   if (st.status === "in_progress" && st.partial_progress) {
     const done = st.partial_progress.completed_scene_ids;
-    if (Array.isArray(done)) return `${done.length} scene${done.length === 1 ? "" : "s"} done`;
-    return "in progress";
+    if (Array.isArray(done)) return `已完成 ${done.length} 个场景`;
+    return "进行中";
   }
-  if (st.status === "in_progress") return "in progress";
-  if (st.status === "failed") return st.error ? String(st.error).slice(0, 60) : "failed";
+  if (st.status === "in_progress") return "进行中";
+  if (st.status === "failed") return st.error ? String(st.error).slice(0, 60) : "失败";
   if (st.timestamp) {
-    const approved = st.gated && st.human_approved ? " · approved" : "";
+    const approved = st.gated && st.human_approved ? " · 已批准" : "";
     return fmtClock(st.timestamp) + approved;
   }
   return "";
 }
+
+const STAGE_NAMES_ZH = {
+  idea: "创意", proposal: "提案", research: "调研", script: "脚本",
+  scene_plan: "场景规划", character_design: "角色设计", rig_plan: "绑定规划",
+  assets: "素材生成", real_capture: "实拍采集", synthetic_terminal: "合成终端",
+  edit: "剪辑", compose: "合成", qa: "质检", render: "渲染", publish: "发布", sample: "抽样",
+};
+const stageZH = (n) => STAGE_NAMES_ZH[n] || n;
 
 function renderRail(s) {
   const rail = el("nav", { class: "rail" });
@@ -112,12 +120,12 @@ function renderRail(s) {
     if (!STAGE_ICONS[st.status]) pendingIndex += 1;
     const node = el("div", {
       class: `stage ${cls}${selectedStage === st.name ? " selected" : ""}${st.undeclared ? " undeclared" : ""}`,
-      title: st.undeclared ? `"${st.name}" ran but isn't declared by this pipeline's manifest` : null,
+      title: st.undeclared ? `"${st.name}" 已运行，但未在该流水线的清单中声明` : null,
       onclick: () => toggleDrawer(st.name),
     },
       el("span", { class: "line" }),
       el("span", { class: "node" }, icon),
-      el("span", { class: "name" }, st.name),
+      el("span", { class: "name" }, stageZH(st.name)),
       el("span", { class: "sub", style: "white-space:pre-line" },
         st.undeclared ? `${stageSub(st)}\nunlisted`.trim() : stageSub(st)),
     );
@@ -172,7 +180,7 @@ function renderDrawer(s) {
   }
   if (!shown) {
     body.append(el("div", { class: "hint" },
-      st.status === "pending" ? "This stage hasn't run yet." : "No canonical artifact found on disk for this stage."));
+      st.status === "pending" ? "该阶段尚未运行。" : "磁盘上未找到该阶段的标准产物。"));
   }
 
   return el("div", { class: "drawer" },
@@ -197,7 +205,7 @@ function scriptSections(script, limit) {
   const nodes = [];
   for (const sec of shown) {
     nodes.push(el("div", { class: "sp-slug" },
-      `${(sec.id || "").toUpperCase()} — ${sec.label || "Section"} `,
+      `${(sec.id || "").toUpperCase()} — ${sec.label || "小节"} `,
       el("span", { class: "tc" }, `${fmtDuration(sec.start_seconds)} – ${fmtDuration(sec.end_seconds)}`)));
     if (sec.text) nodes.push(el("div", { class: "sp-action" }, sec.text));
     if (sec.speaker_directions) nodes.push(el("div", { class: "sp-paren" }, `(${sec.speaker_directions})`));
@@ -219,11 +227,11 @@ function renderScriptCard(s) {
   const scriptStage = s.stages.find((x) => x.name === "script");
   const approved = scriptStage && scriptStage.status === "completed";
 
-  const card = el("div", { class: "script-card", title: "Click to expand full script", onclick: openScriptModal },
-    approved ? el("span", { class: "script-approved" }, "APPROVED") : null,
+  const card = el("div", { class: "script-card", title: "点击展开完整脚本", onclick: openScriptModal },
+    approved ? el("span", { class: "script-approved" }, "已批准") : null,
     el("div", { class: "sp-title" }, script.title || s.title),
     el("div", { class: "sp-meta" },
-      `script · ${fmtDuration(script.total_duration_seconds)} · ${(script.sections || []).length} sections`),
+      `脚本 · ${fmtDuration(script.total_duration_seconds)} · ${(script.sections || []).length} 个小节`),
     ...scriptSections(script, 4),
     el("span", { class: "sp-expand" }, "⤢ EXPAND SCRIPT"),
   );
@@ -240,7 +248,7 @@ function openScriptModal() {
       el("div", { class: "script-card", style: "cursor:default" },
         el("div", { class: "sp-title" }, script.title || state.title),
         el("div", { class: "sp-meta" },
-          `script · ${fmtDuration(script.total_duration_seconds)} · ${(script.sections || []).length} sections`),
+          `脚本 · ${fmtDuration(script.total_duration_seconds)} · ${(script.sections || []).length} 个小节`),
         ...scriptSections(script, 0),
         el("div", { class: "sp-fade" }, "END"),
       )),
@@ -301,12 +309,12 @@ function renderDecisions(s) {
         revised ? el("span", { class: "d-revised" }, " · revised") : null),
       el("div", { class: "d-pick" }, `${d.subject || ""} `, el("span", { class: "arrow" }, "→"), ` ${selLabel}`),
       d.reason ? el("div", { class: "d-why" }, d.reason) : null,
-      alts.length ? el("div", { class: "d-alt" }, "also considered: ",
+      alts.length ? el("div", { class: "d-alt" }, "备选方案：",
         alts.slice(0, 3).map((o, i) => [i ? " · " : "", el("s", {}, o.label || o.option_id)]).flat()) : null,
     ));
   }
   return el("div", { class: "panel" },
-    el("div", { class: "panel-head" }, el("h2", {}, "Decisions"), el("span", { class: "meta" }, "decision_log.json")),
+    el("div", { class: "panel-head" }, el("h2", {}, "决策"), el("span", { class: "meta" }, "decision_log.json")),
     body);
 }
 
@@ -356,7 +364,7 @@ function renderActivity(s) {
     ));
   }
   return el("div", { class: "panel" },
-    el("div", { class: "panel-head" }, el("h2", {}, "Activity"), el("span", { class: "meta" }, "events.jsonl")),
+    el("div", { class: "panel-head" }, el("h2", {}, "活动"), el("span", { class: "meta" }, "events.jsonl")),
     body);
 }
 
@@ -415,15 +423,15 @@ function sceneCard(s, card) {
         t.className = "thumb spec";
         t.innerHTML = "";
         t.append(el("div", { class: "spec-in" },
-          el("div", { class: "spec-desc" }, card.description || "asset unavailable"),
+          el("div", { class: "spec-desc" }, card.description || "素材不可用"),
           el("div", { class: "spec-shot" }, [card.framing, card.movement].filter(Boolean).join(" · ").slice(0, 70))));
       };
       thumb = el("div", { class: "thumb approved" }, img,
-        v.snapshot ? el("span", { class: "badge" }, "snapshot") : (badge ? el("span", { class: "badge" }, badge) : null));
+        v.snapshot ? el("span", { class: "badge" }, "快照") : (badge ? el("span", { class: "badge" }, badge) : null));
     }
   } else if (card.type === "animation") {
     // Bespoke/atelier scene with no snapshot yet — name it as such rather
-    // than "no asset yet" (the composition IS the asset).
+    // than "暂无素材" (the composition IS the asset).
     thumb = el("div", { class: "thumb spec bespoke" },
       el("div", { class: "spec-in" },
         el("span", { class: "bespoke-tag" }, "◆ BESPOKE"),
@@ -433,7 +441,7 @@ function sceneCard(s, card) {
     thumb = el("div", { class: "thumb missing" },
       el("div", { class: "spec-in" },
         el("span", { class: "warn-ic" }, "⚑"),
-        el("div", { class: "spec-desc" }, "asset in manifest, file missing"),
+        el("div", { class: "spec-desc" }, "清单中有此素材，但文件缺失"),
         el("div", { class: "spec-shot" }, card.visual.path || "")));
   } else if (card.type === "text_card") {
     thumb = el("div", { class: "thumb textcard" },
@@ -442,7 +450,7 @@ function sceneCard(s, card) {
     thumb = el("div", { class: "thumb missing" },
       el("div", { class: "spec-in" },
         el("span", { class: "warn-ic" }, "⚑"),
-        el("div", { class: "spec-desc" }, "no asset yet"),
+        el("div", { class: "spec-desc" }, "暂无素材"),
         el("div", { class: "spec-shot" }, (card.required_assets[0].description || "").slice(0, 60))));
   } else {
     thumb = el("div", { class: "thumb spec" },
@@ -483,7 +491,7 @@ function sceneCard(s, card) {
     const long = card.narration.length > 90;
     wrap.append(el("div", {
       class: `narr${long ? " clip" : ""}`,
-      title: "Click to read the full narration",
+      title: "点击阅读完整旁白",
       onclick: () => openNarrModal(card),
     }, card.narration, long ? el("span", { class: "narr-more" }, "⤢") : null));
   } else if (card.shot_intent || card.description) {
@@ -491,7 +499,7 @@ function sceneCard(s, card) {
   }
   const narrAudio = card.audio.find((a) => a.exists && (a.type === "narration" || a.type === "audio"));
   if (narrAudio) {
-    const wave = el("div", { class: "wave", style: "cursor:pointer", title: "Play narration" });
+    const wave = el("div", { class: "wave", style: "cursor:pointer", title: "播放旁白" });
     waveBars(wave, card.id + narrAudio.path);
     wave.append(el("span", { class: "wv-time" }, narrAudio.duration_seconds ? fmtDuration(narrAudio.duration_seconds) : "♪"));
     wave.onclick = () => {
@@ -509,7 +517,7 @@ function renderStoryboard(s) {
   const strip = el("div", { class: "filmstrip" });
   for (const card of board.scenes) strip.append(sceneCard(s, card));
   return el("div", {},
-    el("div", { class: "section-title" }, "Storyboard",
+    el("div", { class: "section-title" }, "分镜板",
       el("span", { class: "meta" },
         `${board.scenes.length} scenes${board.total_duration_seconds ? ` · ${fmtDuration(board.total_duration_seconds)}` : ""} · card width ∝ duration`)),
     el("div", { class: "strip-outer" }, strip));
@@ -547,7 +555,7 @@ function renderRenders(s) {
     el("span", { style: "margin-left:auto" }, `${(current.size / 1048576).toFixed(1)} MB`),
   );
   return el("div", {},
-    el("div", { class: "section-title" }, "Renders",
+    el("div", { class: "section-title" }, "渲染成片",
       el("span", { class: "meta" }, `${renders.length} version${renders.length === 1 ? "" : "s"}`)),
     el("div", { class: "render-hero" }, video),
     versions);
@@ -562,8 +570,8 @@ function renderFoundMedia(s) {
       el("img", { src: thumbURL(s.project_id, snap.path, 640), loading: "lazy", alt: "" })));
   }
   return el("div", {},
-    el("div", { class: "section-title" }, "What the watcher found",
-      el("span", { class: "meta" }, "snapshots / verification frames")),
+    el("div", { class: "section-title" }, "文件监视器发现的内容",
+      el("span", { class: "meta" }, "快照 / 校验帧")),
     grid);
 }
 
@@ -572,9 +580,9 @@ function renderNoState(s) {
   return el("div", { class: "notice", style: "border-color:#2b2b33;background:var(--surface-2);color:var(--text-3)" },
     el("span", { style: "font-size:calc(15px * var(--fs-scale))" }, "◌"),
     el("span", {},
-      el("b", { style: "color:var(--text-2)" }, "No pipeline state. "),
-      "This project has no checkpoints — Backlot is showing what it found on disk. ",
-      "Runs that follow the checkpoint protocol get the full board."));
+      el("b", { style: "color:var(--text-2)" }, "暂无流水线状态。"),
+      "该项目没有检查点 — Cutlin Studio 仅展示磁盘上找到的内容。",
+      "遵循检查点协议的运行才会获得完整看板。"));
 }
 
 function renderAwaitingNotice(s) {
@@ -583,8 +591,8 @@ function renderAwaitingNotice(s) {
   return el("div", { class: "notice" },
     el("span", { style: "font-size:calc(16px * var(--fs-scale))" }, "◈"),
     el("span", {},
-      el("b", {}, `The ${awaiting.name} stage is waiting for your review. `),
-      "The agent is paused at this gate — reply ", el("b", {}, "in chat"), " to approve or request changes."));
+      el("b", {}, `${stageZH(awaiting.name)} 阶段正在等待你的审阅。`),
+      "智能体已在此门禁处暂停 — 请", el("b", {}, "在对话中"), "回复以批准或提出修改。"));
 }
 
 // ---------------------------------------------------------------------------
@@ -679,8 +687,8 @@ function renderReplayBar(s) {
   if (!replay) {
     // collapsed: just the entry button
     return el("div", { class: "replay-bar", style: "justify-content:flex-end" },
-      el("span", { class: "rp-time" }, "scrub the whole run"),
-      el("span", { class: "rp-btn", onclick: startReplay }, "▶ REPLAY RUN"));
+      el("span", { class: "rp-time" }, "拖动回放整次运行"),
+      el("span", { class: "rp-btn", onclick: startReplay }, "▶ 回放运行"));
   }
   const pos = (replay.t - replay.t0) / Math.max(1, replay.t1 - replay.t0);
   const timeLabel = el("span", { class: "rp-time" },
@@ -821,7 +829,7 @@ async function refresh() {
 refresh().catch((err) => {
   app.innerHTML = "";
   app.append(el("div", { class: "empty", style: "margin-top:80px" },
-    el("div", { class: "big" }, "PROJECT NOT FOUND"),
+    el("div", { class: "big" }, "未找到项目"),
     el("div", {}, String(err))));
 });
 // ?static=1 disables the live feed (screenshots, static exports).

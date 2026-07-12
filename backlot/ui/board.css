@@ -3,7 +3,7 @@
    Dark-room editorial: near-black matte canvas, artifacts glow.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
   --bg: #f4f5f7;
@@ -26,9 +26,9 @@
   --cream-shade: #dfe6f5;
   --cream-ink: #1e2a4a;
   --cream-ink-2: #5a6a8f;
-  --sans: 'Space Grotesk', -apple-system, sans-serif;
+  --sans: 'Space Grotesk', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --screenplay: 'IBM Plex Serif', Georgia, serif;
+  --screenplay: 'IBM Plex Serif', 'Noto Serif SC', 'Songti SC', Georgia, serif;
 
   /* Global type scale. */
   --fs-scale: 1.12;
