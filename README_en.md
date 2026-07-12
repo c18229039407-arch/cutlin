@@ -102,6 +102,8 @@ python -m backlot open <project-id>     # one production's live board
 python scripts/backlot_simulate_run.py  # no production yet? watch a simulated one live
 ```
 
+> **Prefer double-click?** The repo root ships launchers: `打开观测端.bat` (Windows) and `打开观测端.command` (macOS; right-click → Open on first run if Gatekeeper blocks it).
+
 And when a run is done, hit **▶ 回放运行 (Replay Run)** — the whole production replays from its timestamps, scrubbable end to end. See [`backlot/README.md`](backlot/README.md) for how it works.
 
 ---
