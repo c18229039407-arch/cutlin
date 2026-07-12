@@ -73,8 +73,8 @@ Chat tells you what the agent *said*. **Cutlin Studio shows you what the product
 The agent opens it for you automatically when a production starts. To open it manually:
 
 ```bash
-python -m backlot open                  # the library — every project on disk
-python -m backlot open <project-id>     # one production's live board
+python -m backlot open                  # library view: every project found on disk
+python -m backlot open <project-id>     # zoom into one production's live board
 python scripts/backlot_simulate_run.py  # no production yet? watch a simulated one
 ```
 
@@ -96,9 +96,10 @@ The board is read-only: it watches `projects/` and pushes updates over SSE witho
 ### Install & Run
 
 ```bash
+# grab the source, step inside, install everything in one go
 git clone https://github.com/c18229039407-arch/cutlin.git
 cd cutlin
-make setup
+make setup   # = Python deps + Remotion + piper-tts + a fresh .env
 ```
 
 Open the directory in your AI coding assistant and just ask:
@@ -115,7 +116,14 @@ Or, for the real-footage route:
 
 From there it's out of your hands in the best way: the agent researches the topic with live web search, generates visuals, writes and voices the script with voice direction, auto-sources royalty-free music, burns word-level subtitles, and renders the cut. Before anything reaches your eyes, the system runs a multi-point self-check — ffprobe validation, frame sampling, audio-level analysis, delivery-promise verification, subtitle checks. Every provider pick is scored on 7 dimensions and archived. Every creative fork waits for your sign-off.
 
-> **`make` missing on your system?** Run the equivalent by hand — macOS/Linux: `python3 -m venv .venv && source .venv/bin/activate && python -m pip install -r requirements.txt && cd remotion-composer && npm install && cd .. && python -m pip install piper-tts && cp .env.example .env`
+> **No `make` on this machine?** Do what it would have done, step by step (macOS/Linux):
+> ```bash
+> python3 -m venv .venv && source .venv/bin/activate   # create + enter the venv
+> python -m pip install -r requirements.txt            # Python deps
+> ( cd remotion-composer && npm install )              # render-engine deps
+> python -m pip install piper-tts                      # free local TTS
+> cp .env.example .env                                 # key template
+> ```
 >
 > Windows PowerShell: `py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`
 >
@@ -143,37 +151,39 @@ This repository was built to be operated by agents. Fastest way to get productiv
 ```bash
 # .env — every key is optional; add the ones you have
 
-# Image + video gateway:
-FAL_KEY=your-key               # FLUX images + Google Veo, Kling, MiniMax video + Recraft images
+# Nothing here is mandatory — fill in the keys you actually hold, delete the rest
 
-# Free stock media:
-PEXELS_API_KEY=your-key        # free stock footage and images
-PIXABAY_API_KEY=your-key       # free stock footage and images
-UNSPLASH_ACCESS_KEY=your-key   # free stock images
+# ── one key, several doors ─────────────────────────
+FAL_KEY=<paste-yours>            # unlocks FLUX/Recraft imagery plus Veo, Kling, MiniMax video
 
-# Music:
-SUNO_API_KEY=your-key          # full songs and instrumentals, any genre
+# ── free stock libraries (sign up, get a key) ──────
+PEXELS_API_KEY=<paste-yours>     # footage + photo library
+PIXABAY_API_KEY=<paste-yours>    # footage + photo library
+UNSPLASH_ACCESS_KEY=<paste-yours> # photo library
 
-# Voice & images:
-ELEVENLABS_API_KEY=your-key    # top-tier TTS, AI music, sound effects
-OPENAI_API_KEY=your-key        # OpenAI TTS, GPT Image 2
-XAI_API_KEY=your-key           # xAI Grok image edit/generation + Grok video
-GOOGLE_API_KEY=your-key        # Google Imagen images, Google TTS (700+ voices)
+# ── soundtrack ─────────────────────────────────────
+SUNO_API_KEY=<paste-yours>       # whole tracks with vocals or instrumentals, genre of your choosing
 
-# More video providers:
-HEYGEN_API_KEY=your-key        # HeyGen — unified gateway to VEO, Sora, Runway, Kling
-RUNWAY_API_KEY=your-key        # Runway Gen-4 direct
+# ── direct lines to voice & image vendors ──────────
+ELEVENLABS_API_KEY=<paste-yours> # flagship-grade TTS, with music and SFX on the side
+OPENAI_API_KEY=<paste-yours>     # brings in OpenAI TTS and GPT Image 2
+XAI_API_KEY=<paste-yours>        # Grok's image editing/creation and video generation
+GOOGLE_API_KEY=<paste-yours>     # Imagen for stills, Google TTS with 700-odd voices
+
+# ── extra video vendors ────────────────────────────
+HEYGEN_API_KEY=<paste-yours>     # single door into VEO, Sora, Runway, and Kling
+RUNWAY_API_KEY=<paste-yours>     # straight to Runway Gen-4
 ```
 
 <details>
-<summary><strong>Have a GPU? Unlock free local video generation</strong></summary>
+<summary><strong>Got a GPU in the box? Local video generation costs nothing</strong></summary>
 
 ```bash
 make install-gpu
 
-# Then add to .env:
+# then flip the local-generation switch in .env:
 VIDEO_GEN_LOCAL_ENABLED=true
-VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # or wan2.1-14b, hunyuan-1.5, ltx2-local, cogvideo-5b
+VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # swap in wan2.1-14b / hunyuan-1.5 / ltx2-local / cogvideo-5b
 ```
 
 </details>
@@ -184,7 +194,7 @@ VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # or wan2.1-14b, hunyuan-1.5, ltx2-local, cog
 
 No spend, no keys — still real videos. Right after `make setup` you have:
 
-| Capability | Free tool | What it does |
+| What you want | The free way to get it | How far it goes |
 |-----------|-----------|-------------|
 | **Narration** | Piper TTS | local, offline speech synthesis with near-human narration |
 | **Open footage** | Archive.org + NASA + Wikimedia Commons | public-domain archival footage, educational media, documentary material |
@@ -258,7 +268,7 @@ Hunting for more ideas? The **[Prompt Gallery](PROMPT_GALLERY.md)** collects fie
 
 A pipeline is the full journey a production takes — from the first idea to the rendered file.
 
-| Pipeline | What it produces | Best for |
+| Pipeline | What lands in your folder | Reach for it when |
 |----------|-----------------|----------|
 | **Animated Explainer** | AI-generated explainer with research, narration, visuals, music | education, tutorials, topic breakdowns |
 | **Animation** | motion graphics, kinetic typography, animated sequences | social media, product demos, abstract concepts |
@@ -292,16 +302,16 @@ Most "free AI video" stacks quietly mean "animate some stills." Cutlin can do th
 
 Edit your own on-camera footage. Generate a fully animated explainer from nothing. Split a two-hour podcast into a dozen social clips. Translate and dub your content into ten languages. Assemble a cinematic brand trailer from stock and AI scenes. **If a production team can make it, Cutlin can orchestrate it.**
 
-- **12 production pipelines** — explainers, talking head, screen demos, cinematic trailers, animation, podcasts, localization, documentary montage
-- **52 production tools** — video generation, image creation, TTS, music, mixing, subtitles, enhancement, analysis
-- **400+ agent skills** — production skills, pipeline directors, creative methods, QA checklists, and deep technical knowledge packs that teach the agent to use every tool like a professional
-- **Reference-driven creation** — paste a video you like; the agent translates it into a grounded, differentiated production plan so you never have to craft the perfect prompt
-- **Real documentaries without paid video models** — properly cut films from free/open motion footage and archives, not zooms on still images
-- **Built-in live web research** — 15–25 searches across YouTube, Reddit, news, and academic sites before scripting, so content stands on fresh, real data
-- **Free/local and cloud providers, side by side** — every capability has an open-source local option or a premium API; use whichever you have
-- **No vendor lock-in** — swap providers freely; the system scores them on 7 dimensions (task fit, output quality, control, reliability, cost efficiency, latency, continuity) and auto-picks the best match
-- **Production-grade quality gates** — delivery-promise enforcement blocks slideshow-grade renders; pre-compose validation stops broken plans before they burn GPU; mandatory post-render self-review (ffprobe + frame sampling + audio analysis) means junk never ships. Every provider pick, style call, and fallback lands in an auditable decision log
-- **Built-in budget controls** — pre-run estimates, spend caps, per-action approval thresholds. No billing surprises
+- **Twelve pipelines, fully staffed** — explainer, talking head, screen capture, trailer, animation, podcast repurposing, dubbing, and real-footage montage all ship ready to run
+- **Fifty-two registered tools** — generation for video and stills, voice, scoring, mixing, captions, enhancement, and content understanding
+- **Four hundred-plus skill files** — production standards, per-stage directors, creative playbooks, QA checklists, and deep-dive technical manuals that turn "can call the tool" into "uses it well"
+- **A reference clip is a valid brief** — hand over a video you admire and get back a plan that is grounded yet distinct; no prompt-crafting anguish required
+- **Genuine films without buying a video model** — cut from real footage in free and open archives instead of faking motion with pans over stills
+- **Research is a mandatory stage** — 15 to 25 live searches across YouTube, Reddit, news, and academic sources before a word of script gets written
+- **Two tracks for every capability** — an open local option and a premium API side by side; the system uses whatever you happen to have
+- **Nobody locks you in** — vendors hot-swap freely, ranked automatically across seven axes: task fit, quality, control, reliability, value, latency, continuity
+- **Shipping standards borrowed from software** — delivery promises catch "animated slideshows," pre-compose checks spare your GPU from doomed plans, and a forced post-render audit (ffprobe + frame pulls + audio analysis) keeps junk in-house; every call lands in an auditable log
+- **A gate on the wallet** — quotes before spending, hard caps, and per-action approval thresholds; the invoice never surprises you
 
 ---
 
@@ -388,12 +398,12 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 
 ## Supported Providers
 
-> **Full setup guide with pricing and free tiers:** [`docs/PROVIDERS.md`](docs/PROVIDERS.md)
+> Sign-up steps, price tags, and free-tier limits for every vendor live in one place: [`docs/PROVIDERS.md`](docs/PROVIDERS.md).
 
 <details>
-<summary><strong>Video generation — 14 providers</strong></summary>
+<summary><strong>Video generation: fourteen vendors on the bench</strong></summary>
 
-| Provider | Type | Notes |
+| Vendor | How it connects | The short version |
 |----------|------|-------|
 | **Kling** | cloud API | quality and speed in one |
 | **Runway Gen-4** | cloud API | cinematic; Gen-3 Alpha Turbo / Gen-4 Turbo / Gen-4 Aleph |
@@ -413,9 +423,9 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 </details>
 
 <details>
-<summary><strong>Image generation — 10 tools/providers</strong></summary>
+<summary><strong>Image generation: ten ways to get a picture</strong></summary>
 
-| Provider | Type | Notes |
+| Vendor | How it connects | The short version |
 |----------|------|-------|
 | **FLUX** | cloud API | image quality at the front of the pack |
 | **Google Imagen** | cloud API | Imagen 4: crisp output, generous aspect-ratio menu |
@@ -431,9 +441,9 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 </details>
 
 <details>
-<summary><strong>Text-to-speech — 4 providers</strong></summary>
+<summary><strong>Text-to-speech: four voices to choose from</strong></summary>
 
-| Provider | Type | Notes |
+| Vendor | How it connects | The short version |
 |----------|------|-------|
 | **ElevenLabs** | cloud API | the voice-quality ceiling |
 | **Google TTS** | cloud API | 700+ voices, 50+ languages — best for localization |
@@ -443,11 +453,11 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 </details>
 
 <details>
-<summary><strong>Music, SFX & post-production</strong></summary>
+<summary><strong>Score, sound design & the full post suite</strong></summary>
 
 **Music & sound effects:**
 
-| Provider | Type | Notes |
+| Vendor | How it connects | The short version |
 |----------|------|-------|
 | **Suno AI** | cloud API | full songs with vocals and lyrics, any genre, up to 8 minutes |
 | **ElevenLabs Music** | cloud API | AI music generation |
@@ -455,7 +465,7 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 
 **Post-production (always on, always free):**
 
-| Tool | What it does |
+| Component | Its job |
 |------|-------------|
 | **FFmpeg** | video assembly, encoding, subtitle burn-in, audio mixing |
 | **Video Stitch** | multi-clip assembly, crossfades, picture-in-picture, spatial layouts |
@@ -467,7 +477,7 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 
 **Enhancement:**
 
-| Tool | What it does |
+| Component | Its job |
 |------|-------------|
 | **Upscale** | Real-ESRGAN super-resolution for both stills and footage |
 | **Background Remove** | rembg / U2Net background removal |
@@ -476,7 +486,7 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 
 **Analysis:**
 
-| Tool | What it does |
+| Component | Its job |
 |------|-------------|
 | **Transcriber** | WhisperX transcription, timestamped to the individual word |
 | **Scene Detect** | spots the cut points without help |
@@ -485,14 +495,14 @@ Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inve
 
 **Avatar & lip sync:**
 
-| Tool | What it does |
+| Component | Its job |
 |------|-------------|
 | **Talking Head** | animates a still portrait into a speaking presenter (SadTalker / MuseTalk) |
 | **Lip Sync** | matches mouth movement to any audio track (Wav2Lip) |
 
 **Composition & rendering:**
 
-| Engine | Type | What it does |
+| Engine | Runs as | What it brings |
 |--------|------|-------------|
 | **Remotion** | local (Node.js) | programmatic React video: spring-animated image scenes, data reveals, chapter titles, showcase cards, TikTok-style word captions, scene transitions (fade/slide/wipe/flip), Google Fonts, audio with fade curves, TalkingHead compositing. **With no video-gen provider configured, the agent generates stills and Remotion turns them into fully animated video.** |
 | **HyperFrames** | local (Node.js ≥ 22) | programmatic HTML/CSS/GSAP video: kinetic typography, product spots, launch teasers, custom motion graphics, registered blocks (data charts, noise overlays, shader transitions), website-to-video workflows, rigged SVG character animation. Invoked via `npx hyperframes`; no monorepo checkout required. |
@@ -508,7 +518,7 @@ Which render runtime gets used is settled once, at the proposal stage (`render_r
 
 Style playbooks are the visual constitution of a production:
 
-| Playbook | Best for |
+| Style playbook | Content it suits |
 |----------|----------|
 | **Clean Professional** | corporate, education, SaaS |
 | **Flat Motion Graphics** | social media, TikTok, startups |
@@ -522,7 +532,7 @@ A playbook pins down typography, palette, motion language, audio profile, and qu
 
 Render presets for the major platforms, ready out of the box:
 
-| Preset | Resolution | Aspect ratio |
+| Output preset | Pixel spec | Frame shape |
 |---------|-----------|--------------|
 | YouTube Landscape | 1920x1080 | 16:9 |
 | YouTube 4K | 3840x2160 | 16:9 |
@@ -560,14 +570,14 @@ Every significant creative and technical choice — provider, style playbook, mu
 
 ### Budget controls
 
-- **Estimate** before running — see the projected cost
-- **Lock** the budget — reserve funds before the call
-- **Settle** afterward — record actual spend
-- **Configurable modes** — `observe` (track only), `warn` (overspend alerts), `cap` (hard ceiling)
-- **Per-action approval** — spends above a threshold (default: $0.50) pause for confirmation
-- **Total budget cap** — $10 by default, fully configurable
+- **A quote comes first**: the projected cost is on the table before anything runs
+- **Funds get reserved**: the amount is locked ahead of the API call, not after
+- **Books are balanced afterward**: actual spend is recorded next to the estimate
+- **Pick your enforcement level**: `observe` just keeps the ledger, `warn` shouts on overruns, `cap` slams the brakes
+- **Big-ticket actions need a human**: anything past the threshold (default $0.50) waits for your sign-off
+- **A global ceiling** sits at $10 out of the box — move it wherever you like
 
-No billing surprises. The agent shows you the number before it spends it.
+The invoice holds no drama: you see every number before a cent leaves the account.
 
 ---
 
@@ -575,7 +585,7 @@ No billing surprises. The agent shows you the number before it spends it.
 
 Any AI coding assistant that reads files and executes Python can drive Cutlin. Platform-specific instruction files are already in place:
 
-| Platform | Config file |
+| Assistant | Its entry file |
 |----------|------------|
 | **Claude Code** | `CLAUDE.md` |
 | **Cursor** | `CURSOR.md` + `.cursor/rules/` |
@@ -585,7 +595,7 @@ Any AI coding assistant that reads files and executes Python can drive Cutlin. P
 
 All the per-platform entry files converge on the same two source documents: `AGENT_GUIDE.md` (operating manual and agent contract) and `PROJECT_CONTEXT.md` (architecture reference).
 
-> **Planned:** local LLM support via **Ollama** and **LM Studio** — running the entire production pipeline without any cloud model.
+> On the roadmap: **Ollama** and **LM Studio** integration, so a local LLM can steer the whole pipeline with no cloud model in the loop.
 
 ---
 
@@ -619,10 +629,10 @@ For bugs, feature requests, and workflow discussions, use [GitHub Issues](https:
 ## Testing
 
 ```bash
-# Run contract tests (no API keys needed)
+# contract suite — runs clean with zero API keys configured
 make test-contracts
 
-# Run all tests
+# the whole battery
 make test
 ```
 
