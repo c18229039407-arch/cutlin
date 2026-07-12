@@ -138,7 +138,7 @@ async def _watch_projects() -> None:
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Backlot", docs_url=None, redoc_url=None)
+    app = FastAPI(title="Cutlin Studio", docs_url=None, redoc_url=None)
 
     @app.on_event("startup")
     async def _startup() -> None:

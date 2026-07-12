@@ -16,7 +16,7 @@ from .base import Candidate, SearchFilters
 
 _SEARCH_URL = "https://api.unsplash.com/search/photos"
 _UNSPLASH_LICENSE = "Unsplash License (use returned hotlinked image URLs)"
-_USER_AGENT = "CutlinBot/0.1 (https://github.com/calesthio/Cutlin)"
+_USER_AGENT = "CutlinBot/0.1 (https://github.com/c18229039407-arch/cutlin)"
 
 
 class UnsplashSource:

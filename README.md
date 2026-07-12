@@ -21,22 +21,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-blue.svg" alt="License"></a>
 </p>
 
-<p align="center">
-  <a href="https://github.com/trending">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/repo-of-the-day-dark.svg">
-      <img alt="🏆 #1 Repository of the Day on GitHub Trending" src=".github/assets/repo-of-the-day-light.svg" height="60">
-    </picture>
-  </a>
-</p>
-
-<p align="center"><strong>Follow The Build</strong></p>
-
-<p align="center">
-  <a href="https://www.youtube.com/@Cutlin"><img src="https://img.shields.io/badge/YouTube-%40Cutlin-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube"></a>
-  <a href="https://x.com/calesthioailabs"><img src="https://img.shields.io/badge/X-%40calesthioailabs-111111?style=for-the-badge&logo=x&logoColor=white" alt="X"></a>
-  <a href="https://github.com/calesthio/Cutlin/discussions"><img src="https://img.shields.io/badge/Community-GitHub%20Discussions-0b1220?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Discussions"></a>
-</p>
 
 ---
 
@@ -44,45 +28,32 @@ Turn your AI coding assistant into a full video production studio. Describe what
 
 **Important distinction:** Cutlin can make image-based videos, but it can also make a real **video video** for free/open-source workflows: the agent builds a corpus from free stock footage and open archives, retrieves actual motion clips, edits them into a timeline, and renders a finished piece. That is not the usual "animate a handful of stills and call it video" trick.
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/f77ce7a4-68b8-4f94-a287-e94bf50a32e1" width="100%" controls></video>
-</div>
+## Technical Showcase
 
-> **"SIGNAL FROM TOMORROW"** — a cinematic sci-fi trailer fully produced through Cutlin: concept, script, scene plan, Veo-generated motion clips, soundtrack, and Remotion composition.
+Cutlin is not a wrapper around one video API — it is a full production system with quality enforcement at every stage.
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/8daca07f-cdf8-4bec-89c3-9dc2176363fa" width="100%" controls></video>
-</div>
+**Pipeline architecture.** Every production flows through a staged pipeline with checkpoints and approval gates:
 
-> **"THE LAST BANANA"** — a 60-second Pixar-style animated short about a lonely banana who finds friendship with a kiwi. 6 Kling v3-generated motion clips (via fal.ai), Google Chirp3-HD narration, royalty-free piano music, TikTok-style word-level captions, and Remotion composition. Total cost: **$1.33**.
+```
+ idea ──▶ research ──▶ script ──▶ scene plan ──▶ assets ──▶ compose ──▶ QA ──▶ render
+   │          │           │            │            │           │        │
+   └──────────┴───────────┴────────────┴────────────┴───────────┴────────┘
+              checkpoints · decision logs · cost snapshots · approval gates
+```
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/e03b5d1f-1199-4093-9f31-a43aa9da2c68" width="100%" controls></video>
-</div>
+**Multi-provider orchestration.** Image, video, voice, and music providers are scored across 7 dimensions (quality, cost, latency, style fit, availability, license, consistency) with an auditable decision log — the system picks the right tool per shot, not per project.
 
-> **"The Library at Alexandria"** — a 70-second history elegy on what humanity lost in a single night. Five hand-authored scenes — an illuminated manuscript page, cascading scroll-tags, a Burning Counter ticking 700,000 → 0 inside a candle's flame, a charred vellum fragment with surviving Greek, and an empty void — set to OpenAI 'ash' narration and a free Pixabay strings score. Total cost: **$0.02**. Built through Cutlin's atelier (bespoke) composition mode — every scene crafted from scratch, no shared components.
+**Composition engines.** Three rendering paths, selected per production:
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/8a6d2cc3-7ad2-46f5-922f-a8e3e5848d9f" width="100%" controls></video>
-</div>
+| Engine | Best for | Cost profile |
+|---|---|---|
+| Remotion composition | data-driven scenes, captions, motion graphics | free (local render) |
+| Image animation (Ken Burns / parallax / particles) | stills-to-motion, anime & editorial styles | ~$0.02–$0.15 per video |
+| Generated motion clips (Veo / Kling / MiniMax / local Wan) | true motion, cinematic shots | ~$0.70–$3 per video |
 
-> **"VOID — Neural Interface"** — a product ad produced with just one API key (OpenAI). 4 AI-generated images (gpt-image-1), TTS narration, auto-sourced royalty-free music, word-level subtitles via WhisperX, and Remotion data visualizations. Total cost: **$0.69**. Zero manual asset work.
+**Self-review before you see anything.** ffprobe validation, frame sampling, audio level analysis, delivery-promise verification, and subtitle checks run automatically on every render.
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/3c5d7122-7198-43e2-a97d-ed27558dd324" width="100%" controls></video>
-</div>
-
-> **"Afternoon in Candyland"** — a Ghibli-style anime animation. A little girl's whimsical afternoon adventure through candy gates, gumdrop rivers, and lollipop gardens. 12 FLUX-generated images with multi-image crossfade, cinematic camera motion (zoom, pan, Ken Burns), sparkle/petal/firefly particle overlays, and ambient music with auto-detected energy offset. Total cost: **$0.15**. No video generation, no manual editing.
-
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/e8dc5e32-5c70-46de-bd52-eef887719d13" width="100%" controls></video>
-</div>
-
-> **"Mori no Seishin"** — a Ghibli-style anime animation of a forest spirit's journey through ancient woods. 12 FLUX-generated images with parallax crossfade, drift and pan camera motion, firefly and petal particles, cinematic vignette lighting, and ambient forest soundtrack. Total cost: **$0.15**. Still images brought to life through Remotion's animation engine.
-
-<p align="center">
-  <a href="https://www.youtube.com/@Cutlin?sub_confirmation=1"><strong>Subscribe to @Cutlin on YouTube</strong></a> to see new videos as they ship — every video includes the full prompt, pipeline, tools used, and cost so you can reproduce it yourself.
-</p>
+**Zero-key baseline.** With no API keys at all, the free path still works: stock footage corpus retrieval, timeline editing, local Remotion render.
 
 ---
 
@@ -117,19 +88,11 @@ Chat tells you what the agent *said*. **Backlot shows you what the production is
 
 When a production starts, the agent opens it for you automatically. No setup, no reporting — the board derives everything from the project files the pipeline already writes.
 
-<p align="center"><img src="docs/images/backlot/board-live.png" alt="Backlot live board — assets generating" width="920"></p>
-
 **The storyboard is now a real approval gate.** Asset generation pauses on a scene-by-scene contact sheet — takes, prompts, per-asset cost, quality scores — so you approve the visuals *before* the render, not after it's too late:
-
-<p align="center"><img src="docs/images/backlot/storyboard.png" alt="Backlot storyboard — filmstrip with takes and renders" width="920"></p>
 
 Creative gates hold until you answer. The board shows what's waiting and why; you reply in chat:
 
-<p align="center"><img src="docs/images/backlot/script-gate.png" alt="Backlot script gate — awaiting approval" width="920"></p>
-
 Every production on your machine, live-first, in the library:
-
-<p align="center"><img src="docs/images/backlot/library.png" alt="Backlot library" width="920"></p>
 
 ```bash
 python -m backlot open                  # the library — every project on disk
@@ -153,7 +116,7 @@ And when a run is done, hit **▶ REPLAY RUN** — the whole production replays 
 ### Install & Run
 
 ```bash
-git clone https://github.com/calesthio/Cutlin.git
+git clone https://github.com/c18229039407-arch/cutlin.git
 cd Cutlin
 make setup
 ```
@@ -666,23 +629,10 @@ Cutlin is built to be extended. The two most common contributions:
 
 See `docs/ARCHITECTURE.md` for the full technical reference, `docs/PROVIDERS.md` for the complete provider guide (setup, pricing, free tiers), and `AGENT_GUIDE.md` for the agent contract.
 
-### Join the Community
+### Feedback
 
-We use [GitHub Discussions](https://github.com/calesthio/Cutlin/discussions) to share work and ideas:
 
-- **[Show and Tell](https://github.com/calesthio/Cutlin/discussions/categories/show-and-tell)** — Share videos you've made, prompts that worked well, or creative workflows you've discovered
-- **[Ideas](https://github.com/calesthio/Cutlin/discussions/categories/ideas)** — Suggest new pipelines, tools, style playbooks, or integrations
-- **[Q&A](https://github.com/calesthio/Cutlin/discussions/categories/q-a)** — Ask questions about setup, pipelines, or troubleshooting
-
-Made something cool? Post it in Show and Tell — we'd love to see what you build.
-
----
-
-## Contact
-
-For updates, releases, and behind-the-scenes build notes, follow [@calesthioailabs](https://x.com/calesthioailabs).
-
-For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/calesthio/Cutlin/issues) and [GitHub Discussions](https://github.com/calesthio/Cutlin/discussions) so everything stays visible and actionable.
+For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/c18229039407-arch/cutlin/issues).
 
 ---
 
@@ -698,18 +648,6 @@ make test
 
 ---
 
-## Star History
-
-<a href="https://www.star-history.com/?repos=calesthio%2FCutlin&type=date&legend=top-left">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=calesthio/Cutlin&type=date&theme=dark&legend=top-left" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=calesthio/Cutlin&type=date&legend=top-left" />
-    <img alt="Star History Chart" src="https://api.star-history.com/image?repos=calesthio/Cutlin&type=date&legend=top-left" />
-  </picture>
-</a>
-
----
-
 ## License
 
 [GNU AGPLv3](LICENSE)
@@ -718,6 +656,3 @@ make test
 
 **Cutlin** — Production-grade video with real quality enforcement, orchestrated by your AI assistant.
 
-If this project looks useful to you, a ⭐ would really mean a lot — it helps others discover it too.
-
-If you'd like to go further, [sponsor the project](https://github.com/sponsors/calesthio) — Cutlin is built nights and weekends, and your support makes that sustainable.

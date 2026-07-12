@@ -16,7 +16,7 @@ from .base import Candidate, SearchFilters
 
 
 _API_URL = "https://commons.wikimedia.org/w/api.php"
-_USER_AGENT = "CutlinBot/0.1 (https://github.com/calesthio/Cutlin)"
+_USER_AGENT = "CutlinBot/0.1 (https://github.com/c18229039407-arch/cutlin)"
 _COMMONS_LICENSE = "Wikimedia Commons (verify per-file license)"
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 

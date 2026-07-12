@@ -67,7 +67,7 @@ function renderSlate(s) {
   return el("header", { class: "slate" },
     el("div", { class: "clapper" }),
     el("div", {},
-      el("a", { class: "wordmark", href: "/", style: "text-decoration:none" }, "Backlot"),
+      el("a", { class: "wordmark", href: "/", style: "text-decoration:none" }, "Cutlin Studio"),
       el("h1", {}, s.title),
     ),
     ...chips,
@@ -754,7 +754,7 @@ function tickReplay() {
 function render() {
   if (!state) return;
   const s = replay ? stateAt(state, replay.t) : state;
-  document.title = `Backlot — ${s.title}`;
+  document.title = `Cutlin Studio — ${s.title}`;
   document.body.classList.toggle("first", firstPaint);
   firstPaint = false;
   app.innerHTML = "";
