@@ -652,6 +652,10 @@ make test
 
 [GNU AGPLv3](LICENSE)
 
+## Acknowledgements
+
+Cutlin is a modified fork of [OpenMontage](https://github.com/calesthio/OpenMontage) by calesthio. Thanks to the original authors for their excellent work.
+
 ---
 
 **Cutlin** — Production-grade video with real quality enforcement, orchestrated by your AI assistant.

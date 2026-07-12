@@ -1,6 +1,7 @@
 # NOTICE
 
-Cutlin is a modified derivative of an open-source project licensed under the
+Cutlin is a modified derivative of OpenMontage
+(https://github.com/calesthio/OpenMontage) by calesthio, licensed under the
 GNU Affero General Public License v3.0 (AGPL-3.0).
 
 - This codebase has been modified and rebranded. Date of modification: 2026-07-11.
