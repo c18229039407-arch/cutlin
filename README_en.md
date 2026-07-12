@@ -8,92 +8,15 @@
 
 ---
 
-Cutlin upgrades the AI coding assistant you already use into a full video production crew. You describe what you want; the agent takes it from there — topic research, scriptwriting and voiceover, asset creation, editing, and the final render.
+Cutlin turns the coding agent you already use into an on-call video production crew. Describe the film you want in one sentence; the agent handles everything downstream — research, planning, scripting, voiceover, visuals, editing, rendering — and comes back to you at every decision that matters.
 
-**One distinction worth stating up front:** a lot of "AI video" boils down to slapping a zoom on a few still images. Cutlin can animate stills too, but it also supports a **real-footage route**: the agent pulls genuinely filmed motion clips from royalty-free libraries and open archives, ranks them semantically, cuts them with intent, and renders a proper timeline. That's editing, not sleight of hand.
-
-## Technical Showcase
-
-Cutlin isn't a thin wrapper over somebody's video API — it's a production system with mandatory quality checks wired into every stage.
-
-**Pipeline architecture.** Every production moves through a staged pipeline with checkpoints and approval gates:
-
-```
- idea ──▶ research ──▶ script ──▶ scene plan ──▶ assets ──▶ compose ──▶ QA ──▶ render
-   │          │           │            │            │           │        │
-   └──────────┴───────────┴────────────┴────────────┴───────────┴────────┘
-              checkpoints · decision logs · cost snapshots · approval gates
-```
-
-**Multi-provider orchestration.** Image, video, voice, and music providers are each scored on 7 dimensions (quality, cost, latency, style fit, availability, license, consistency), and the scoring lands in an auditable decision log. Selection happens per shot — not one vendor bolted onto the whole project.
-
-**Three composition engine paths, chosen per production:**
-
-| Engine | Best for | Cost profile |
-|---|---|---|
-| Remotion composition | data-driven scenes, captions, motion graphics | free (local render) |
-| Still-image animation (Ken Burns / parallax / particles) | stills-to-motion, anime & editorial styles | ~$0.02–$0.15 per video |
-| Generated motion clips (Veo / Kling / MiniMax / local Wan) | true motion, cinematic shots | ~$0.70–$3 per video |
-
-**Pre-delivery self-review.** ffprobe validation, frame sampling, audio-level analysis, delivery-promise verification, and subtitle checks run automatically on every render — a failing cut never reaches you.
-
-**Zero-key baseline.** With no API keys configured at all, the free path still works: footage-corpus retrieval, timeline editing, local Remotion rendering.
+One thing worth saying up front: a large share of "AI video" is a camera move layered over still images. Cutlin can do that trick, but its more interesting mode is the **real-footage route** — retrieving genuinely filmed motion from open archives and royalty-free libraries, ranking it semantically, and cutting it into a timeline with intent. What comes out is an edit, not an animated slideshow.
 
 ---
 
-## Start From A Video You Already Love
+## Up and running in three minutes
 
-Instead of agonizing over a blank prompt, hand it a video you admire.
-
-Cutlin accepts a **YouTube video, Short, Reel, TikTok, or local file** as a reference and breaks it down into an actionable production plan:
-
-1. **Paste the reference**
-2. **The agent dissects its copy structure, pacing, scene cuts, key frames, and visual style**
-3. **Before real work begins you get 2–3 distinct concepts, honest tool paths, cost estimates, and samples**
-
-```text
-"I'm sending you a Short that really lands for me. Match its feel, but make the topic quantum computing."
-```
-
-What you get back is not a guessed-at prompt stew — it's a plan that explains itself:
-
-- What was **kept** from the reference: pacing skeleton, hook style, narrative structure, tone
-- What was **swapped**: subject, visual treatment, angle, narration approach
-- What it will **roughly cost** at your target length, before asset generation starts
-- What the render will **actually look like** with the tools you currently have
-
-Any coding agent that can read files and execute code will do the driving — **Claude Code, Cursor, Copilot, Windsurf, and Codex** all work out of the box.
-
----
-
-## Watch It Happen — Cutlin Studio
-
-Chat tells you what the agent *said*. **Cutlin Studio shows you what the production is actually doing**: a local board that fills itself in as the pipeline runs — stages light up, the script lands on the page, asset cards shimmer while generating, and every decision and dollar is on the wall.
-
-The agent opens it for you automatically when a production starts. To open it manually:
-
-```bash
-python -m backlot open                  # library view: every project found on disk
-python -m backlot open <project-id>     # zoom into one production's live board
-python scripts/backlot_simulate_run.py  # no production yet? watch a simulated one
-```
-
-> **Prefer double-click?** The repo root ships launchers: `打开观测端.bat` (Windows) and `打开观测端.command` (macOS; right-click → Open on first run if Gatekeeper blocks it).
-
-The board is read-only: it watches `projects/` and pushes updates over SSE without touching the production. Approvals happen back in your AI assistant's chat. After a run finishes, hit **▶ Replay Run** to scrub the whole production by its timestamps. See [`backlot/README.md`](backlot/README.md).
-
----
-
-## Quick Start
-
-### Prerequisites
-
-- **Python, version 3.10 at minimum** — download at [python.org](https://www.python.org/downloads/)
-- **FFmpeg** — `brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Ubuntu, otherwise [ffmpeg.org](https://ffmpeg.org/download.html)
-- **Node.js 18 or newer** — [nodejs.org](https://nodejs.org/)
-- **An AI coding assistant** — Claude Code, Cursor, Copilot, Windsurf, or Codex
-
-### Install & Run
+Four prerequisites: **Python 3.10+** ([python.org](https://www.python.org/downloads/)), **FFmpeg** (`brew install ffmpeg` on macOS, `sudo apt install ffmpeg` on Ubuntu), **Node.js 18+** ([nodejs.org](https://nodejs.org/)), and any **AI coding assistant** — Claude Code, Cursor, Copilot, Windsurf, or Codex.
 
 ```bash
 # grab the source, step inside, install everything in one go
@@ -101,20 +24,6 @@ git clone https://github.com/c18229039407-arch/cutlin.git
 cd cutlin
 make setup   # = Python deps + Remotion + piper-tts + a fresh .env
 ```
-
-Open the directory in your AI coding assistant and just ask:
-
-```
-"I need one minute of animation that teaches how neural networks learn"
-```
-
-Or, for the real-footage route:
-
-```text
-"Cut a 75-second documentary montage: the city on a rainy night. Real footage only, skip the narration, keep the mood elegiac and score it to match."
-```
-
-From there it's out of your hands in the best way: the agent researches the topic with live web search, generates visuals, writes and voices the script with voice direction, auto-sources royalty-free music, burns word-level subtitles, and renders the cut. Before anything reaches your eyes, the system runs a multi-point self-check — ffprobe validation, frame sampling, audio-level analysis, delivery-promise verification, subtitle checks. Every provider pick is scored on 7 dimensions and archived. Every creative fork waits for your sign-off.
 
 > **No `make` on this machine?** Do what it would have done, step by step (macOS/Linux):
 > ```bash
@@ -124,33 +33,162 @@ From there it's out of your hands in the best way: the agent researches the topi
 > python -m pip install piper-tts                      # free local TTS
 > cp .env.example .env                                 # key template
 > ```
->
-> Windows PowerShell: `py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`
->
-> **Windows:** if `npm install` fails with `ERR_INVALID_ARG_TYPE`, use `npx --yes npm install` instead.
+> On Windows PowerShell: `py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`. If `npm install` throws `ERR_INVALID_ARG_TYPE`, retry with `npx --yes npm install`.
 
-### If You're An Agent Reading This: Welcome Aboard
+Open the folder with your coding assistant and brief it like a producer:
 
-This repository was built to be operated by agents. Fastest way to get productive, in order:
+```
+"I need one minute of animation that teaches how neural networks learn"
+```
 
-1. **Rules before work**
-   Read [`AGENT_GUIDE.md`](AGENT_GUIDE.md) end to end, then build your mental map from [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
-2. **Don't invent your own workflow**
-   Cutlin is pipeline-driven: orchestration lives in `pipeline_defs/`, stage director skills in `skills/pipelines/`, and tools are discovered via the registry.
-3. **Check what cards you're holding**
-   Run:
-   ```bash
-   python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.support_envelope(), indent=2))"
-   python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.provider_menu(), indent=2))"
-   ```
-4. **Treat every video request as a pipeline-selection problem**
-   Pick the right pipeline, read the manifest, read the stage skill — only then touch tools.
+From there the agent researches the topic live on the web, produces the visuals, writes and voices the script to spec, finds royalty-free music, burns word-timed captions, and renders. Before anything reaches you it passes a machine audit — ffprobe checks, frame pulls, audio-level analysis, delivery-promise verification. Too impatient to configure anything? `make demo` renders a zero-key sample immediately.
 
-### Add API Keys (optional — more keys = more tools)
+---
+
+## One production, on the record
+
+Not marketing copy — an actual zero-key run performed by this repo's maintainer, at zero cost:
+
+- **The brief**: a 60-second animated explainer, "How neural networks learn," narrated in Chinese
+- **Voice**: piper local TTS, synthesized in 7 segments and aligned to a measured timeline
+- **Visuals**: 7 Remotion motion-graphics scenes — title card, weights callout, prediction-vs-truth comparison, a loss-descent line chart (the centerpiece), an iteration progress bar, results KPIs, closing card
+- **Music**: an ambient pad synthesized locally with ffmpeg, normalized to −16 LUFS, mixed under at 0.13
+- **QA caught a genuine bug**: post-render frame sampling revealed an empty line chart (a data field didn't match the component contract); after the fix, pixel-level checks confirmed the curve — exactly the failure mode the self-review stage exists for
+- **Bill**: $0.00; final file 1080p / 30fps / 61 seconds
+
+---
+
+## The production board: Cutlin Studio
+
+The chat window tells you what the agent *said*; **Studio shows you what the production is actually doing**. It is a local web board where stages light up, script pages land, asset cards pulse while generating, and every decision and dollar goes up on the wall. The agent opens it for you when a run starts; manual routes:
 
 ```bash
-# .env — every key is optional; add the ones you have
+python -m backlot open                  # library view: every project found on disk
+python -m backlot open <project-id>     # zoom into one production's live board
+python scripts/backlot_simulate_run.py  # no runs yet? watch a simulated production
+```
 
+> **Prefer double-click?** The repo root ships launchers: `打开观测端.bat` (Windows) and `打开观测端.command` (macOS; right-click → Open on first run if Gatekeeper blocks it).
+
+The board is read-only: it watches `projects/` and streams over SSE, never steering the run. Approvals happen back in your assistant's chat. Finished runs replay end-to-end from their timestamps via **▶ 回放运行 (Replay Run)**. Details in [`backlot/README.md`](backlot/README.md).
+
+---
+
+## A clip you admire is a valid brief
+
+Skip the blank-prompt anxiety. Hand Cutlin a **YouTube video, Short, Reel, TikTok link, or a local file** and it reverse-engineers the piece into a buildable blueprint:
+
+1. **Drop in the reference**
+2. **The agent recovers its narrative skeleton, cutting rhythm, shot logic, key frames, and visual temperament**
+3. **Before real work begins, you get several divergent concept passes with tool routing, cost estimates, and preview samples**
+
+```text
+"I'm sending you a Short that really lands for me. Match its feel, but make the topic quantum computing."
+```
+
+What you get back is an articulate plan, not prompt voodoo: what the reference **contributes** (pacing skeleton, cold open, narrative shape, tone), what gets **swapped out** (subject, visual treatment, angle, narration style), roughly **what it will cost** at your target length, and **what it will actually look like** rendered with the tools you have.
+
+### More prompt fuel
+
+Each of these kicks off a full pipeline run. Free with zero keys:
+
+> "Give me a 45-second animated piece on why cats always land on their feet"
+
+> "A 60-second narrated video with captions: how container shipping changed the world"
+
+> "Build a chart-heavy explainer on global renewable energy adoption"
+
+The real-footage documentary route (also free):
+
+> "A 90-second real-footage montage: the last hour before a harbor wakes up. No voiceover, quiet and wistful."
+
+> "One minute of archival collage on the Space Race's public euphoria, essay-film flavor, sourced from open archives."
+
+> "Real stock footage only: a drifting montage about night trains and the people asleep on them. Score it, skip the narration."
+
+To lock that route in, name the format — **documentary montage**, **tone poem**, or **stock-footage collage** — and add **use real footage only**; the pipeline commits to retrieve-and-edit.
+
+With generation providers configured (roughly $0.15–$3 per video):
+
+> "30 seconds of Ghibli-flavored animation: a lighthouse keeper who tends a garden of glowing jellyfish at dusk"
+
+> "Use AI-generated visuals to explain how neural networks learn, aimed at total beginners"
+
+> "A cinematic 30-second teaser: the day every mirror on Earth started showing a five-second delay"
+
+The **[Prompt Gallery](PROMPT_GALLERY.md)** holds field-tested prompts with cost expectations and sample outputs.
+
+---
+
+## The capability map
+
+### Twelve pipelines
+
+| Reach for it when | Pipeline | What lands in your folder |
+|----------|----------|-----------------|
+| teaching, tutorials, one topic done thoroughly | **Animated Explainer** | a finished explainer with research, narration, visuals, and score |
+| social content, product showcases, abstract ideas | **Animation** | motion graphics, kinetic type, animated sequences |
+| internal training, official announcements | **Avatar Spokesperson** | a digital presenter fronting your message |
+| brand image, hype, promotion | **Cinematic** | trailers, teasers, mood-driven cuts |
+| slicing long content for social | **Clip Factory** | one long source in, a prioritized batch of shorts out |
+| video essays, mood pieces, real footage with no paid API | **Documentary Montage** | themed montages cut from a CLIP-searchable open-footage corpus |
+| augmenting footage you already shot | **Hybrid** | your material + AI-generated supporting visuals |
+| shipping in other languages | **Localization & Dub** | translation, subtitles, and re-voicing of existing video |
+| promoting a show, visualizing audio | **Podcast Repurpose** | highlight moments turned into video |
+| feature demos, walkthroughs, docs | **Screen Demo** | polished software screen recordings |
+| talks, vlogs, interviews | **Talking Head** | presenter-led videos built around real people on camera |
+
+All of them ride one skeleton: `idea → research → script → scene plan → assets → edit → compose`. A Markdown **director skill** governs each stage — goals, method, acceptance bar; the agent follows it, self-checks, writes checkpoints, and halts at creative forks for your sign-off. Research is non-negotiable: 15–25 live searches across YouTube, Reddit, news, and academic sources before a word of script exists.
+
+### The vendor bench (all optional; the free path always works)
+
+**Video generation, 14 strong** — cloud: Kling (strong output without the wait), Runway Gen-4 (the cinematic lane, Gen-3 Alpha Turbo through Gen-4 Aleph), Google Veo 3 (long takes, via fal.ai or HeyGen), Grok Imagine Video (reference-image driven), Higgsfield (multi-model with Soul ID character lock), MiniMax (the budget pick), HeyGen (one key, many models); local GPU, all free: WAN 2.1 (1.3B/14B), Hunyuan, CogVideo (2B/5B), LTX-Video (self-hostable on Modal); stock as backstop: Pexels, Pixabay, Wikimedia Commons.
+
+**Image generation, 10 routes** — FLUX (front-of-pack quality), Google Imagen 4, Grok Imagine (edits, restyles, multi-image blends), GPT Image 2, Recraft (design-leaning), local Stable Diffusion (free), ManimCE (purpose-built math/science animation), plus the Pexels / Pixabay / Unsplash libraries.
+
+**Text-to-speech, 4 voices** — ElevenLabs (the quality ceiling), Google TTS (700+ voices, 50+ languages — the localization workhorse), OpenAI TTS (quick and cheap), Piper (free and offline).
+
+**Score & sound** — Suno (whole tracks with vocals, up to 8 minutes), ElevenLabs Music and SFX.
+
+**The post suite (always free)** — FFmpeg for assembly and encoding, Video Stitch for joins and transitions, Video Trimmer for frame-accurate cuts, Audio Mixer with ducking, Audio Enhance for denoise and loudness, Color Grade via LUTs, Subtitle Gen for SRT/VTT; enhancement via Real-ESRGAN upscaling, rembg background removal, CodeFormer/GFPGAN face restoration; analysis via WhisperX word-level transcription, scene-boundary detection, smart frame sampling, and CLIP/BLIP-2 visual understanding; avatars via SadTalker/MuseTalk animation and Wav2Lip mouth sync.
+
+> Sign-up steps, price tags, and free-tier limits for every vendor live in one place: [`docs/PROVIDERS.md`](docs/PROVIDERS.md).
+
+### Three composition engines
+
+| Engine | Runs as | What it brings |
+|--------|------|-------------|
+| **Remotion** | local (Node.js) | video written in React: spring-animated image scenes, data reveals, chapter cards, showcase cards, TikTok-style word captions, four transition families, Google Fonts, fade-curved audio, TalkingHead compositing. **With no video vendor configured it degrades gracefully: the agent produces stills and Remotion supplies all the motion.** |
+| **HyperFrames** | local (Node.js ≥ 22) | video written in HTML/CSS/GSAP: kinetic type, product spots, launch teasers, registered blocks (data charts, noise layers, shader transitions), website-to-video, rigged SVG character performance. One `npx hyperframes` call, no monorepo download. |
+| **FFmpeg** | local | the bedrock: assembly, encoding, subtitle burn-in, audio mux, color work |
+
+Remotion versus HyperFrames is settled once, at the proposal stage, written to `render_runtime`, and frozen via `edit_decisions`; switching mid-run is a governance violation. The full decision matrix lives in `skills/core/hyperframes.md`.
+
+---
+
+## How far does zero keys go?
+
+Everything `make setup` leaves you with, free:
+
+| What you want | The free way to get it | How far it goes |
+|-----------|-----------|-------------|
+| **Narration** | Piper TTS | runs offline on your machine, natural-sounding delivery |
+| **Open footage** | Archive.org + NASA + Wikimedia Commons | public-domain archive clips, educational media, documentary-grade material |
+| **More stock** | Pexels + Unsplash + Pixabay | free photo and footage libraries; developer keys are free to register |
+| **Compositing (React)** | Remotion | the full Remotion column above |
+| **Compositing (HTML/GSAP)** | HyperFrames | the full HyperFrames column above |
+| **Post** | FFmpeg | encode, burn subtitles, mix audio, grade color |
+| **Captions** | built in | word-timed subtitles, generated automatically |
+
+Three near-zero-cost routes to a finished film:
+
+- **Stills, set in motion**: Piper reads the script, image tools supply frames, Remotion gives the cut its rhythm and movement.
+- **Cartoon characters, performed locally**: SVG rigs with pose libraries on GSAP timelines, rendered by HyperFrames straight to `projects/<name>/renders/final.mp4`.
+- **A film from real footage**: the documentary-montage pipeline builds a CLIP-searchable corpus from open sources, then cuts genuine motion into a complete piece.
+
+## Want more? Drop keys into .env
+
+```bash
 # Nothing here is mandatory — fill in the keys you actually hold, delete the rest
 
 # ── one key, several doors ─────────────────────────
@@ -190,134 +228,24 @@ VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # swap in wan2.1-14b / hunyuan-1.5 / ltx2-loc
 
 ---
 
-## What You Get With Zero API Keys
-
-No spend, no keys — still real videos. Right after `make setup` you have:
-
-| What you want | The free way to get it | How far it goes |
-|-----------|-----------|-------------|
-| **Narration** | Piper TTS | local, offline speech synthesis with near-human narration |
-| **Open footage** | Archive.org + NASA + Wikimedia Commons | public-domain archival footage, educational media, documentary material |
-| **Extra stock** | Pexels + Unsplash + Pixabay | free stock video and images (developer keys are free to obtain) |
-| **Composition (React)** | Remotion | React rendering: spring-animated image scenes, text cards, data cards, charts, TikTok-style word captions, TalkingHead avatars |
-| **Composition (HTML/GSAP)** | HyperFrames | HTML/CSS/GSAP rendering: kinetic typography, product spots, launch teasers, website-to-video, rigged SVG character animation |
-| **Post-production** | FFmpeg | encoding, subtitle burn-in, audio mixing, color grading |
-| **Captions** | built-in | auto-generated subtitles with word-level timing |
-
-Remotion vs. HyperFrames is decided at the proposal stage and locked into `render_runtime`: data-driven explainers and anything reusing the existing React scene stack default to Remotion; heavy motion-graphics work that's more natural in HTML + GSAP (including the `character-animation` pipeline's rigged SVG output) defaults to HyperFrames. Full decision matrix in `skills/core/hyperframes.md`.
-
-**A few nearly-free paths:**
-
-- **Image-based video:** Piper reads the script, images supply the visuals, Remotion choreographs them into a polished cut.
-- **Local character animation:** SVG rigs + pose libraries + GSAP timelines; HyperFrames renders the cartoon performance to `projects/<project-name>/renders/final.mp4`.
-- **Real-footage video:** the documentary-montage pipeline builds a CLIP-searchable corpus from Archive.org, NASA, Wikimedia Commons (optionally Pexels and Unsplash) and cuts genuine motion footage into a complete film.
-
-To lock in that third route, name the format explicitly — **documentary montage**, **tone poem**, or **stock-footage collage** — and add the phrase **use real footage only**; the pipeline will commit to the retrieve-and-edit path.
-
----
-
-## Try These Prompts
-
-Once set up, drop any of these into your AI coding assistant — each one triggers a full pipeline run.
-
-### Start from a reference video
-
-> "This short nails the vibe I want. Recreate that feel, but teach high-schoolers how mRNA vaccines work."
-
-> "Break down what makes this Reel work, then pitch me three fresh takes I could shoot for my app launch."
-
-> "Steal the rhythm and the cold-open from this clip, and rebuild it as a 40-second piece on how GPS satellites keep time."
-
-### Zero keys needed
-
-> "Give me a 45-second animated piece on why cats always land on their feet"
-
-> "A 60-second narrated video with captions: how container shipping changed the world"
-
-> "Build a chart-heavy explainer on global renewable energy adoption"
-
-### Free real-footage documentary path
-
-> "A 90-second real-footage montage: the last hour before a harbor wakes up. No voiceover, quiet and wistful."
-
-> "One minute of archival collage on the Space Race's public euphoria, essay-film flavor, sourced from open archives."
-
-> "Real stock footage only: a drifting montage about night trains and the people asleep on them. Score it, skip the narration."
-
-### With an image/video provider configured (~$0.15–$1.50)
-
-> "30 seconds of Ghibli-flavored animation: a lighthouse keeper who tends a garden of glowing jellyfish at dusk"
-
-> "An anime-style half-minute: an abandoned observatory on a snowfield, aurora overhead, one warm window lit"
-
-> "Use AI-generated visuals to explain how neural networks learn, aimed at total beginners"
-
-> "Cut a launch teaser for Lumo, a made-up desk lamp that reads your focus and shifts its light"
-
-### Full setup (~$1–$3)
-
-> "A cinematic 30-second teaser: the day every mirror on Earth started showing a five-second delay"
-
-> "90 animated seconds on how the immune system fights a virus, for middle schoolers — playful narrator, original score"
-
-Hunting for more ideas? The **[Prompt Gallery](PROMPT_GALLERY.md)** collects field-tested prompts with expected costs and sample outputs — or run `make demo` to render a zero-key demo right now.
-
----
-
-## Pipelines
-
-A pipeline is the full journey a production takes — from the first idea to the rendered file.
-
-| Pipeline | What lands in your folder | Reach for it when |
-|----------|-----------------|----------|
-| **Animated Explainer** | AI-generated explainer with research, narration, visuals, music | education, tutorials, topic breakdowns |
-| **Animation** | motion graphics, kinetic typography, animated sequences | social media, product demos, abstract concepts |
-| **Avatar Spokesperson** | digital-human presenter videos | corporate comms, training, announcements |
-| **Cinematic** | trailers, teasers, mood-driven cuts | brand films, teasers, promos |
-| **Clip Factory** | ranked short clips mass-produced from one long source | repurposing long content into social shorts |
-| **Documentary Montage** | thematic montages cut from CLIP-indexed free libraries and open archives (Pexels, Archive.org, NASA, Wikimedia, Unsplash) | video essays, mood pieces, retrieval-first B-roll cuts, real-footage video without paid video APIs |
-| **Hybrid** | user footage + AI-generated supporting visuals | reinforcing existing footage with graphics |
-| **Localization & Dub** | subtitles, translation, and dubbing for existing video | multilingual distribution |
-| **Podcast Repurpose** | podcast highlights turned into video | podcast marketing, audiograms |
-| **Screen Demo** | polished software screen recordings and walkthroughs | product demos, tutorials, docs |
-| **Talking Head** | presenter-led videos built around real people on camera | presentations, vlogs, interviews |
-
-Every pipeline shares one skeleton:
-
-```
-research → proposal → script → scene plan → assets → edit → compose
-```
-
-Each stage carries a **director skill** — a Markdown instruction file that tells the agent exactly how to run that step. The agent reads the skill, uses the tools, reviews its own work, checkpoints state, and stops for your approval at creative decision points.
-
-> **Web research is a formal stage, not garnish.** Before a single line of script gets written, the agent searches YouTube, Reddit, Hacker News, news outlets, and academic sources — collecting data points, audience questions, trending angles, and visual references into a structured research brief. Your video stands on real, current information, not hallucinated "facts."
-
----
-
-## Why Cutlin?
-
-The typical AI video product is a vending machine: one prompt in, one clip out. Cutlin gives you an **end-to-end production pipeline** — the same structured process a real production team follows, executed by your AI agent.
-
-Most "free AI video" stacks quietly mean "animate some stills." Cutlin can do that trick too, but it can also finish films from **real footage** sourced through free and open channels: semantically ranked, deliberately cut, rendered as a proper timeline.
-
-Edit your own on-camera footage. Generate a fully animated explainer from nothing. Split a two-hour podcast into a dozen social clips. Translate and dub your content into ten languages. Assemble a cinematic brand trailer from stock and AI scenes. **If a production team can make it, Cutlin can orchestrate it.**
+## Why it earns the pick
 
 - **Twelve pipelines, fully staffed** — explainer, talking head, screen capture, trailer, animation, podcast repurposing, dubbing, and real-footage montage all ship ready to run
 - **Fifty-two registered tools** — generation for video and stills, voice, scoring, mixing, captions, enhancement, and content understanding
-- **Four hundred-plus skill files** — production standards, per-stage directors, creative playbooks, QA checklists, and deep-dive technical manuals that turn "can call the tool" into "uses it well"
-- **A reference clip is a valid brief** — hand over a video you admire and get back a plan that is grounded yet distinct; no prompt-crafting anguish required
-- **Genuine films without buying a video model** — cut from real footage in free and open archives instead of faking motion with pans over stills
-- **Research is a mandatory stage** — 15 to 25 live searches across YouTube, Reddit, news, and academic sources before a word of script gets written
-- **Two tracks for every capability** — an open local option and a premium API side by side; the system uses whatever you happen to have
-- **Nobody locks you in** — vendors hot-swap freely, ranked automatically across seven axes: task fit, quality, control, reliability, value, latency, continuity
-- **Shipping standards borrowed from software** — delivery promises catch "animated slideshows," pre-compose checks spare your GPU from doomed plans, and a forced post-render audit (ffprobe + frame pulls + audio analysis) keeps junk in-house; every call lands in an auditable log
-- **A gate on the wallet** — quotes before spending, hard caps, and per-action approval thresholds; the invoice never surprises you
+- **Four hundred-plus skill files** — production standards, per-stage directors, creative playbooks, QA checklists, and deep-dive manuals that turn "can call the tool" into "uses it well"
+- **A reference clip is a valid brief** — hand over a video you admire, get back a plan that is grounded yet distinct
+- **Genuine films without buying a video model** — cut from real footage in free and open archives
+- **Nobody locks you in** — vendors hot-swap freely, auto-ranked across seven axes
+- **Shipping standards borrowed from software** — delivery promises catch "animated slideshows," pre-compose checks spare your GPU, a forced post-render audit keeps junk in-house, and every call lands in an auditable log
+- **A gate on the wallet** — quotes before spending, hard caps, per-action approval thresholds
+
+Hand it your own talking-head footage to fine-cut. Start an animated explainer from nothing. Split a two-hour podcast into a dozen social clips. Dub one piece into ten languages. **If a production crew could schedule it, Cutlin can orchestrate it.**
 
 ---
 
-## How It Works
+## How the machine runs
 
-Cutlin is built **agent-first**: there is no hidden code orchestrator hiding backstage — your AI coding assistant is the orchestrator.
+The architectural creed is **agent-first**: no orchestration program lurks backstage — the entity in the director's chair is your coding assistant itself.
 
 ```
 You: "Make me an explainer on how black holes form"
@@ -353,38 +281,36 @@ Post-render audit: ffprobe, frame pulls, audio analysis, promise verification
 The video ships — only after every check above clears
 ```
 
-**Python supplies tools and persistence — not judgment.** All creative decisions, orchestration logic, review criteria, and quality bars live in human-readable instruction files (YAML manifests + Markdown skills) you can inspect and rewrite. Every decision is archived with its alternatives, confidence scores, and reasoning.
+**Python does the labor and the bookkeeping; it never makes the call.** Creative judgment, orchestration logic, review criteria, and quality bars all live in human-readable YAML manifests and Markdown skills you can read and rewrite. Every decision is archived with its alternatives, confidence score, and reasoning.
 
----
-
-## Architecture
+### The lay of the repo
 
 ```
 Cutlin/
 ├── tools/              # 48 Python tools — the hands the agent works with
-│   ├── video/          # 13 video generation tools + compose, stitch, trim
-│   ├── audio/          # 4 TTS providers + Suno/ElevenLabs music, mixing, enhancement
-│   ├── graphics/       # 9 image/graphics tools + charts, code snippets, math animation
-│   ├── enhancement/    # upscaling, background removal, face enhancement, color grading
+│   ├── video/          # 13 video generators plus compose, stitch, trim
+│   ├── audio/          # 4 TTS vendors, Suno/ElevenLabs music, mixing, enhancement
+│   ├── graphics/       # 9 image/graphics generators incl. charts, code cards, math animation
+│   ├── enhancement/    # upscaling, background removal, face restoration, grading
 │   ├── analysis/       # transcription, scene detection, frame sampling
-│   ├── avatar/         # digital humans, lip sync
-│   └── subtitle/       # SRT/VTT generation
+│   ├── avatar/         # digital humans and lip sync
+│   └── subtitle/       # SRT/VTT output
 │
-├── pipeline_defs/      # YAML pipeline manifests (the agent's "scripts")
-├── skills/             # Markdown skill files (the agent's "knowledge")
-│   ├── pipelines/      # per-pipeline stage director skills
-│   ├── creative/       # creative technique skills
-│   ├── core/           # core tool skills
-│   └── meta/           # reviewers, checkpoint protocol
+├── pipeline_defs/      # YAML manifests — the stage plays the agent performs
+├── skills/             # Markdown skill library — the agent's working knowledge
+│   ├── pipelines/      # per-stage directors for every pipeline
+│   ├── creative/       # craft and technique skills
+│   ├── core/           # core tool usage
+│   └── meta/           # review standards and the checkpoint protocol
 │
-├── schemas/            # 15 JSON Schemas (contract validation)
-├── styles/             # visual style guidance (YAML)
-├── remotion-composer/  # React/Remotion composition engine
-├── lib/                # core infrastructure (config, checkpoints, pipeline loader)
-└── tests/              # contract tests, QA integration tests, eval toolkit
+├── schemas/            # 15 JSON Schemas where artifacts prove their shape
+├── styles/             # visual style playbooks (YAML)
+├── remotion-composer/  # the React/Remotion composition engine
+├── lib/                # foundations: config, checkpoints, pipeline loading
+└── tests/              # contract tests, QA integration, evaluation kit
 ```
 
-### Three-tier knowledge architecture
+Knowledge sits in three tiers:
 
 ```
 Tier 1  tools/ + pipeline_defs/    the inventory: what capabilities exist and how they chain
@@ -392,241 +318,61 @@ Tier 2  skills/                    the house rules: Cutlin's conventions and qua
 Tier 3  .agents/skills/            the deep cuts: external technical know-how, on demand
 ```
 
-Tools declare which Tier-3 skills they depend on. The agent reads Tier 1 to inventory its tools, Tier 2 to learn the house rules, and reaches for Tier 3 when it needs to go deep.
+Every tool declares which Tier-3 packs it leans on. The agent reads Tier 1 to count its cards, Tier 2 to learn the house rules, and opens Tier 3 only when a technique needs real depth.
 
 ---
 
-## Supported Providers
+## Production governance
 
-> Sign-up steps, price tags, and free-tier limits for every vendor live in one place: [`docs/PROVIDERS.md`](docs/PROVIDERS.md).
+Video production held to software-engineering rigor: a quality gate at every stage, an audit trail behind every decision, a constraint on every dollar.
 
-<details>
-<summary><strong>Video generation: fourteen vendors on the bench</strong></summary>
+**Quality gates.** The pre-compose check stops plans that break their delivery promise (pledging "motion-first" while 80% is stills), score critical on slideshow risk, or miss their renderer family — doomed plans die before they burn GPU. The post-render audit runs ffprobe, samples frames at four positions for black screens and broken overlays, analyzes audio for silence and clipping, verifies promises, and checks captions; a failing cut never reaches you. Slideshow risk is scored across six dimensions to block "PowerPoint that moves." When you submit your own media, each file is probed for real parameters — no guessing content from filenames.
 
-| Vendor | How it connects | The short version |
-|----------|------|-------|
-| **Kling** | cloud API | quality and speed in one |
-| **Runway Gen-4** | cloud API | cinematic; Gen-3 Alpha Turbo / Gen-4 Turbo / Gen-4 Aleph |
-| **Google Veo 3** | cloud API | long-form, cinematic; via fal.ai or HeyGen |
-| **Grok Imagine Video** | cloud API | strong reference-driven video and native xAI short-form generation |
-| **Higgsfield** | cloud API | multi-model orchestrator with Soul ID character consistency |
-| **MiniMax** | cloud API | standout cost efficiency |
-| **HeyGen** | cloud API | unified multi-model gateway |
-| **WAN 2.1** | local GPU | free; 1.3B and 14B variants |
-| **Hunyuan** | local GPU | free, excellent quality |
-| **CogVideo** | local GPU | free; 2B and 5B variants |
-| **LTX-Video** | local GPU / Modal | free locally, or self-hosted in the cloud |
-| **Pexels** | stock | free stock footage |
-| **Pixabay** | stock | free stock footage |
-| **Wikimedia Commons** | stock | free/open footage and archival material |
+**Scored selection.** Every vendor pick — video, image, voice, music — runs the 7-axis engine: task fit 30%, output quality 20%, control 15%, reliability 15%, cost efficiency 10%, latency and continuity 5% each. Losers' scores are archived beside the winner's. The selector also normalizes loose briefs into scoreable intent — even a single line like "Pixar-style short with consistent characters" — and its output carries the winner's `agent_skills` index so the agent can read the matching Tier-3 pack before writing a single generation prompt.
 
-</details>
+**Decision audit.** Vendor, style playbook, soundtrack, voice, renderer family, every fallback — recorded with alternatives, confidence, and reasoning, accumulated across stages and persisted. However the final film turned out, every step is traceable.
 
-<details>
-<summary><strong>Image generation: ten ways to get a picture</strong></summary>
-
-| Vendor | How it connects | The short version |
-|----------|------|-------|
-| **FLUX** | cloud API | image quality at the front of the pack |
-| **Google Imagen** | cloud API | Imagen 4: crisp output, generous aspect-ratio menu |
-| **Grok Imagine Image** | cloud API | shines at edits, restyling, and blending several inputs |
-| **GPT Image 2** | cloud API | OpenAI's image model |
-| **Recraft** | cloud API | leans toward design-grade output |
-| **Local Diffusion** | local GPU | Stable Diffusion on your own card, no bill |
-| **Pexels** | stock | free stock images |
-| **Pixabay** | stock | free stock images |
-| **Unsplash** | stock | free stock images |
-| **ManimCE** | local | purpose-built for math and science animation |
-
-</details>
-
-<details>
-<summary><strong>Text-to-speech: four voices to choose from</strong></summary>
-
-| Vendor | How it connects | The short version |
-|----------|------|-------|
-| **ElevenLabs** | cloud API | the voice-quality ceiling |
-| **Google TTS** | cloud API | 700+ voices, 50+ languages — best for localization |
-| **OpenAI TTS** | cloud API | fast and inexpensive |
-| **Piper** | local | completely free, works offline |
-
-</details>
-
-<details>
-<summary><strong>Score, sound design & the full post suite</strong></summary>
-
-**Music & sound effects:**
-
-| Vendor | How it connects | The short version |
-|----------|------|-------|
-| **Suno AI** | cloud API | full songs with vocals and lyrics, any genre, up to 8 minutes |
-| **ElevenLabs Music** | cloud API | AI music generation |
-| **ElevenLabs SFX** | cloud API | sound-effect generation |
-
-**Post-production (always on, always free):**
-
-| Component | Its job |
-|------|-------------|
-| **FFmpeg** | video assembly, encoding, subtitle burn-in, audio mixing |
-| **Video Stitch** | multi-clip assembly, crossfades, picture-in-picture, spatial layouts |
-| **Video Trimmer** | precise cuts and extraction |
-| **Audio Mixer** | multi-track mixing, ducking, fades |
-| **Audio Enhance** | noise reduction, loudness normalization |
-| **Color Grade** | LUT-based color grading |
-| **Subtitle Gen** | SRT/VTT from timestamps |
-
-**Enhancement:**
-
-| Component | Its job |
-|------|-------------|
-| **Upscale** | Real-ESRGAN super-resolution for both stills and footage |
-| **Background Remove** | rembg / U2Net background removal |
-| **Face Enhance** | facial quality enhancement |
-| **Face Restore** | CodeFormer / GFPGAN face restoration |
-
-**Analysis:**
-
-| Component | Its job |
-|------|-------------|
-| **Transcriber** | WhisperX transcription, timestamped to the individual word |
-| **Scene Detect** | spots the cut points without help |
-| **Frame Sampler** | pulls representative frames, not random ones |
-| **Video Understand** | reads what is on screen via CLIP/BLIP-2 |
-
-**Avatar & lip sync:**
-
-| Component | Its job |
-|------|-------------|
-| **Talking Head** | animates a still portrait into a speaking presenter (SadTalker / MuseTalk) |
-| **Lip Sync** | matches mouth movement to any audio track (Wav2Lip) |
-
-**Composition & rendering:**
-
-| Engine | Runs as | What it brings |
-|--------|------|-------------|
-| **Remotion** | local (Node.js) | programmatic React video: spring-animated image scenes, data reveals, chapter titles, showcase cards, TikTok-style word captions, scene transitions (fade/slide/wipe/flip), Google Fonts, audio with fade curves, TalkingHead compositing. **With no video-gen provider configured, the agent generates stills and Remotion turns them into fully animated video.** |
-| **HyperFrames** | local (Node.js ≥ 22) | programmatic HTML/CSS/GSAP video: kinetic typography, product spots, launch teasers, custom motion graphics, registered blocks (data charts, noise overlays, shader transitions), website-to-video workflows, rigged SVG character animation. Invoked via `npx hyperframes`; no monorepo checkout required. |
-| **FFmpeg** | local | core assembly, encoding, subtitle burn-in, mixing, grading |
-
-Which render runtime gets used is settled once, at the proposal stage (`render_runtime`), and then locked via `edit_decisions`. Silently switching runtimes mid-run is a governance violation — see `skills/core/hyperframes.md`.
-
-</details>
+**Budget gates.** A quote before spending, funds reserved at call time, books balanced afterward; `observe` / `warn` / `cap` enforcement levels; per-action holds past the threshold (default $0.50); a global ceiling at $10, movable at will.
 
 ---
 
-## Style System
+## Style and output specs
 
-Style playbooks are the visual constitution of a production:
+Three **style playbooks** act as a production's visual constitution — typography, palette, motion language, audio profile, and quality rules in one binding document: Clean Professional (corporate, education, SaaS), Flat Motion Graphics (social content, TikTok, startups), Minimalist Diagram (deep technical teardowns, architecture walkthroughs).
 
-| Style playbook | Content it suits |
-|----------|----------|
-| **Clean Professional** | corporate, education, SaaS |
-| **Flat Motion Graphics** | social media, TikTok, startups |
-| **Minimalist Diagram** | technical deep dives, architecture |
-
-A playbook pins down typography, palette, motion language, audio profile, and quality rules; the agent reads it once and applies it to every generated asset.
+**Output presets** come ready for the major platforms: 16:9 landscape for YouTube 1080p/4K and LinkedIn; 9:16 vertical covering Shorts, Reels, and TikTok at 1080×1920; 1:1 square for Instagram feed at 1080×1080; and a 21:9 cinematic 2560×1080.
 
 ---
 
-## Platform Output Presets
+## If you are an agent reading this: welcome aboard
 
-Render presets for the major platforms, ready out of the box:
+This repository was laid out for agents to work in. The fastest route to competence:
 
-| Output preset | Pixel spec | Frame shape |
-|---------|-----------|--------------|
-| YouTube Landscape | 1920x1080 | 16:9 |
-| YouTube 4K | 3840x2160 | 16:9 |
-| YouTube Shorts | 1080x1920 | 9:16 |
-| Instagram Reels | 1080x1920 | 9:16 |
-| Instagram Feed | 1080x1080 | 1:1 |
-| TikTok | 1080x1920 | 9:16 |
-| LinkedIn | 1920x1080 | 16:9 |
-| Cinematic | 2560x1080 | 21:9 |
+1. **Rules before work**
+   Read [`AGENT_GUIDE.md`](AGENT_GUIDE.md) end to end, then build your map from [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
+2. **No improvised workflows**
+   Everything runs on pipelines: orchestration lives in `pipeline_defs/`, per-stage direction in `skills/pipelines/`, and the registry discovers the tools.
+3. **Count your cards before playing**
+   ```bash
+   python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.support_envelope(), indent=2))"
+   python -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.provider_menu(), indent=2))"
+   ```
+4. **Every video request starts with "which pipeline?"**
+   The iron order: pick the pipeline, read its manifest, read the stage skills, and only then touch tools.
 
----
-
-## Production Governance
-
-Cutlin treats video production with the rigor of software engineering: quality gates at every stage, an audit trail behind every decision, a leash on every dollar.
-
-### Quality gates
-
-- **Pre-compose validation** — a broken delivery promise (say, a "motion-forward" video that's 80% stills), a critical slideshow-risk score, or a missing renderer family each blocks the render. Bad plans get stopped before they burn GPU time.
-- **Post-render self-review** — after every render the runtime runs ffprobe validation, samples frames at 4 positions to catch black screens and broken overlays, analyzes audio for silence or clipping, verifies the delivery promise, and checks subtitles. Fail the review, and the video is never shown.
-- **Slideshow-risk scoring** — a 6-dimension analysis (repetitiveness, decorative visuals, weak motion, shot intent, typography over-reliance, unsupported cinematic claims) blocks "animated PowerPoint" output.
-- **Source-file inspection** — when users supply their own footage, the system probes every file (resolution, codec, audio channels, duration) and builds a planning baseline before any creative decision. No more inventing content from filenames.
-
-### Score-based provider selection
-
-Every tool pick (video gen, image gen, TTS, music) goes through a 7-dimension scoring engine: task fit (30%), output quality (20%), control features (15%), reliability (15%), cost efficiency (10%), latency (5%), continuity (5%). The winner — and every alternative's score — lands in the decision record.
-
-The selector normalizes loose brief context before scoring: even if all the agent has is "Pixar-style short with consistent characters," it expands that into scoreable intent and style signals without demanding a perfectly pre-shaped `task_context`.
-
-Selector output also surfaces the winning provider's `agent_skills`, so the agent can jump straight to the relevant Tier-3 skill before writing a single prompt.
-
-### Decision audit trail
-
-Every significant creative and technical choice — provider, style playbook, music track, voice, renderer family, plus any fallback or downgrade — is recorded with its alternatives, confidence scores, and reasoning. The accumulated decision log persists across all stages, so you can trace exactly why the output looks the way it does.
-
-### Budget controls
-
-- **A quote comes first**: the projected cost is on the table before anything runs
-- **Funds get reserved**: the amount is locked ahead of the API call, not after
-- **Books are balanced afterward**: actual spend is recorded next to the estimate
-- **Pick your enforcement level**: `observe` just keeps the ledger, `warn` shouts on overruns, `cap` slams the brakes
-- **Big-ticket actions need a human**: anything past the threshold (default $0.50) waits for your sign-off
-- **A global ceiling** sits at $10 out of the box — move it wherever you like
-
-The invoice holds no drama: you see every number before a cent leaves the account.
-
----
-
-## Agent Compatibility
-
-Any AI coding assistant that reads files and executes Python can drive Cutlin. Platform-specific instruction files are already in place:
-
-| Assistant | Its entry file |
-|----------|------------|
-| **Claude Code** | `CLAUDE.md` |
-| **Cursor** | `CURSOR.md` + `.cursor/rules/` |
-| **GitHub Copilot** | `COPILOT.md` + `.github/copilot-instructions.md` |
-| **Codex** | `CODEX.md` |
-| **Windsurf** | `.windsurfrules` |
-
-All the per-platform entry files converge on the same two source documents: `AGENT_GUIDE.md` (operating manual and agent contract) and `PROJECT_CONTEXT.md` (architecture reference).
+Per-platform entry files are ready: Claude Code reads `CLAUDE.md`; Cursor, `CURSOR.md` plus `.cursor/rules/`; GitHub Copilot, `COPILOT.md` plus `.github/copilot-instructions.md`; Codex, `CODEX.md`; Windsurf, `.windsurfrules`. All of them converge on the same two source documents: `AGENT_GUIDE.md` (the operating contract) and `PROJECT_CONTEXT.md` (the architecture map).
 
 > On the roadmap: **Ollama** and **LM Studio** integration, so a local LLM can steer the whole pipeline with no cloud model in the loop.
 
 ---
 
-## Contributing
+## Extending and contributing
 
-Extension points are baked into the architecture. The two most common contributions:
+Extension points are baked in. A new tool: pick its home under `tools/`, drop a Python file, subclass `BaseTool` and fill in the contract; the registry recruits it automatically on scan — add a skill doc if usage isn't self-evident. A new pipeline: sketch the manifest in YAML under `pipeline_defs/`, give each stage a director skill under `skills/pipelines/<name>/`, and reuse tools where you can.
 
-### Adding a new tool
+Going deeper: the technical panorama is in `docs/ARCHITECTURE.md`, vendor sign-up/pricing/quotas in `docs/PROVIDERS.md`, the agent contract in `AGENT_GUIDE.md`.
 
-1. Create a Python file in the matching `tools/` subdirectory
-2. Inherit from `BaseTool` and implement the tool contract
-3. The registry discovers it automatically — no manual registration
-4. If the tool needs usage guidance, add a matching skill file
-
-### Adding a new pipeline
-
-1. Sketch the whole pipeline as a YAML manifest inside `pipeline_defs/`
-2. Give each stage a director skills in `skills/pipelines/<your-pipeline>/`
-3. Reuse existing tools — add new ones only when needed
-
-Full technical reference in `docs/ARCHITECTURE.md`, provider guide (setup, pricing, free tiers) in `docs/PROVIDERS.md`, agent contract in `AGENT_GUIDE.md`.
-
----
-
-## Contact
-
-For bugs, feature requests, and workflow discussions, use [GitHub Issues](https://github.com/c18229039407-arch/cutlin/issues) so everything stays trackable.
-
----
-
-## Testing
+**Tests**:
 
 ```bash
 # contract suite — runs clean with zero API keys configured
@@ -635,6 +381,8 @@ make test-contracts
 # the whole battery
 make test
 ```
+
+**Feedback**: bugs, feature requests, and workflow discussion all go through [GitHub Issues](https://github.com/c18229039407-arch/cutlin/issues).
 
 ---
 
