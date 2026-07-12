@@ -119,7 +119,7 @@ And when a run is done, hit **▶ 回放运行 (Replay Run)** — the whole prod
 
 ```bash
 git clone https://github.com/c18229039407-arch/cutlin.git
-cd Cutlin
+cd cutlin
 make setup
 ```
 
