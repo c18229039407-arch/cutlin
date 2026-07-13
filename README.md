@@ -391,9 +391,6 @@ make test
 
 [GNU AGPLv3](LICENSE)
 
-## 致谢
-
-Cutlin 基于 [OpenMontage](https://github.com/calesthio/OpenMontage)（作者 calesthio）修改而来，感谢原作者的出色工作。
 
 ---
 
