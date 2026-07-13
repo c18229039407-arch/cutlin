@@ -33,7 +33,15 @@ make setup   # = Python deps + Remotion + piper-tts + a fresh .env
 > python -m pip install piper-tts                      # free local TTS
 > cp .env.example .env                                 # key template
 > ```
-> On Windows PowerShell: `py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`. If `npm install` throws `ERR_INVALID_ARG_TYPE`, retry with `npx --yes npm install`.
+> On Windows PowerShell:
+> ```powershell
+> py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1   # create + enter the venv
+> python -m pip install -r requirements.txt            # Python deps
+> cd remotion-composer; npm install; cd ..             # render-engine deps
+> python -m pip install piper-tts                      # free local TTS
+> Copy-Item .env.example .env                          # key template
+> ```
+> If `npm install` throws `ERR_INVALID_ARG_TYPE`, retry with `npx --yes npm install`.
 
 Open the folder with your coding assistant and brief it like a producer:
 

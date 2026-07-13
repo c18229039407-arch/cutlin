@@ -33,7 +33,15 @@ make setup   # = Python 依赖 + Remotion + piper-tts + 生成 .env
 > python -m pip install piper-tts                      # 免费本地 TTS
 > cp .env.example .env                                 # 密钥配置模板
 > ```
-> Windows PowerShell 对应为：`py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1; python -m pip install -r requirements.txt; cd remotion-composer; npm install; cd ..; python -m pip install piper-tts; Copy-Item .env.example .env`；若 `npm install` 抛 `ERR_INVALID_ARG_TYPE`，换 `npx --yes npm install` 再试。
+> Windows PowerShell 对应为：
+> ```powershell
+> py -3 -m venv .venv; .\.venv\Scripts\Activate.ps1   # 建好并激活虚拟环境
+> python -m pip install -r requirements.txt            # Python 依赖
+> cd remotion-composer; npm install; cd ..             # 渲染引擎依赖
+> python -m pip install piper-tts                      # 免费本地 TTS
+> Copy-Item .env.example .env                          # 密钥配置模板
+> ```
+> 若 `npm install` 抛 `ERR_INVALID_ARG_TYPE`，换 `npx --yes npm install` 再试。
 
 装好后，用 AI 助手打开这个目录，像跟制片人说话一样下需求：
 
