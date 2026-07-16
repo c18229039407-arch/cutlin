@@ -1,0 +1,225 @@
+name: storyboard-ad
+version: "1.0"
+description: >
+  Storyboard-driven, minute-scale ad production. Current video models cap out
+  around 5-15 seconds per shot, so minute-scale pieces are built shot by shot:
+  research -> script -> storyboard -> character kit (multi-view reference
+  sheets) -> per-shot generation with keyframe-first approval and first/last
+  frame chaining -> Remotion assembly with unified grading and a single
+  cross-shot audio bed. Per-shot QA gates stop character drift before it
+  compounds; the budget carries an explicit reshoot reserve.
+category: cinematic
+stability: beta
+default_checkpoint_policy: guided
+
+reference_input:
+  supported: true
+  analysis_depth: deep
+  analysis_tools:
+    - video_analyzer
+    - transcript_fetcher
+    - video_downloader
+    - scene_detect
+    - frame_sampler
+
+orchestration:
+  mode: executive-producer
+  skill: pipelines/storyboard-ad/executive-producer
+  budget_default_usd: 5.00
+  max_revisions_per_stage: 3
+  max_send_backs: 3
+  max_wall_time_minutes: 30
+
+extensions:
+  custom_scripts: true
+  custom_playbooks: true
+  custom_skills: true
+  custom_tools: false
+
+required_skills:
+  - pipelines/storyboard-ad/executive-producer
+  - pipelines/storyboard-ad/research-director
+  - pipelines/storyboard-ad/proposal-director
+  - pipelines/storyboard-ad/script-director
+  - pipelines/storyboard-ad/storyboard-director
+  - pipelines/storyboard-ad/character-director
+  - pipelines/storyboard-ad/shots-director
+  - pipelines/storyboard-ad/assembly-director
+  - pipelines/storyboard-ad/publish-director
+  - core/budget-video-providers
+  - meta/reviewer
+  - meta/checkpoint-protocol
+
+compatible_playbooks:
+  recommended:
+    - clean-professional
+  also_works:
+    - flat-motion-graphics
+  custom_allowed: true
+
+stages:
+  - name: research
+    skill: pipelines/storyboard-ad/research-director
+    produces:
+      - research_brief
+    tools_available:
+      - web_search
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - Product, audience, and platform norms are concrete, not generic
+      - Competitor ad structures are decomposed into shot patterns
+      - Claims that will appear on screen are sourced
+    success_criteria:
+      - Schema-valid research_brief artifact
+      - At least 8 web searches executed
+
+  - name: proposal
+    skill: pipelines/storyboard-ad/proposal-director
+    required_artifacts_in:
+      - research_brief
+    produces:
+      - proposal_packet
+      - decision_log
+    tools_available: []
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Total runtime, shot count, and per-shot duration budget are explicit
+      - Renderer family is selected and locked
+      - Cost estimate includes a 30-50% reshoot reserve for generated shots
+      - Delivery promise states motion source (generated vs supplied) per shot class
+    success_criteria:
+      - Schema-valid proposal_packet artifact
+      - Cost estimate carries an explicit reshoot_reserve line item
+      - At least 2 concept directions with different shot structures
+
+  - name: script
+    skill: pipelines/storyboard-ad/script-director
+    required_artifacts_in:
+      - proposal_packet
+    produces:
+      - script
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - Narration lines map one-to-one onto planned shot windows
+      - On-screen text is listed separately from narration (it will be overlaid, not generated)
+    success_criteria:
+      - Schema-valid script artifact
+
+  - name: storyboard
+    skill: pipelines/storyboard-ad/storyboard-director
+    required_artifacts_in:
+      - script
+    produces:
+      - storyboard
+      - decision_log
+    tools_available:
+      - frame_sampler
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Every shot has id, duration, framing, camera move, and content brief
+      - Adjacent shots declare their continuity plan (hard cut vs first/last-frame chain)
+      - Text and data elements are marked as overlay layers, never in-model
+      - Shot durations respect the 5-15s single-generation ceiling
+    success_criteria:
+      - Total shot durations sum to the approved runtime
+      - Each chained pair specifies which frame carries over
+
+  - name: character
+    skill: pipelines/storyboard-ad/character-director
+    required_artifacts_in:
+      - storyboard
+    produces:
+      - character_kit
+    tools_available:
+      - flux_image
+      - image_selector
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Stage may produce an empty kit when the storyboard has no recurring entities (record the skip decision in the log)
+      - Every recurring character/product has a card (appearance, wardrobe, props)
+        plus a multi-view reference sheet (front/side/three-quarter minimum)
+      - Reference sheets share one lighting setup and neutral background
+      - Human has approved the sheets BEFORE any motion generation spends
+    success_criteria:
+      - character_kit contains at least 3 views per recurring entity
+      - Lighting and wardrobe notes recorded for continuity checks
+
+  - name: shots
+    skill: pipelines/storyboard-ad/shots-director
+    required_artifacts_in:
+      - storyboard
+    optional_artifacts_in:
+      - character_kit
+    produces:
+      - shot_library
+      - decision_log
+    tools_available:
+      - image_selector
+      - video_selector
+      - flux_image
+      - kling_video
+      - veo_video
+      - minimax_video
+      - wan_video_fal
+      - ltx2_video_fal
+      - pixverse_video
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - "Keyframe-first: every generated shot starts from an approved still"
+      - Chained shots consume the upstream shot's tail frame as reference
+      - Per-shot QA ran BEFORE the next shot started (identity, lighting, wardrobe)
+      - Reshoots drew from the reserve and are logged with reasons
+    success_criteria:
+      - Every storyboard shot has an accepted clip in shot_library
+      - Per-shot QA verdicts recorded (identity check + frame sampling)
+      - Spend within budget including reserve
+
+  - name: assembly
+    skill: pipelines/storyboard-ad/assembly-director
+    required_artifacts_in:
+      - shot_library
+      - script
+    produces:
+      - edit_decisions
+      - render_manifest
+    tools_available:
+      - audio_mixer
+      - audio_enhance
+      - color_grade
+      - subtitle_gen
+      - video_compose
+    checkpoint_required: true
+    human_approval_default: false
+    review_focus:
+      - One LUT / grade pass unifies color across all shots
+      - Narration and music are laid as full-timeline tracks, never per shot
+      - All text (captions, titles, end card) lives on overlay layers
+      - Transitions follow the storyboard continuity plan
+    success_criteria:
+      - Schema-valid edit_decisions
+      - Pre-compose gate passed (delivery promise, renderer governance)
+
+  - name: publish
+    skill: pipelines/storyboard-ad/publish-director
+    required_artifacts_in:
+      - render_manifest
+    produces:
+      - final_video
+      - qa_report
+    tools_available:
+      - video_compose
+    checkpoint_required: true
+    human_approval_default: true
+    review_focus:
+      - Post-render audit passed (ffprobe, frame pulls, audio levels)
+      - Cut-boundary frames sampled — no background flashes, no identity drift
+      - On-screen claims match the sourced research
+    success_criteria:
+      - qa_report shows all checks green
+      - Final duration within ±2s of approved runtime

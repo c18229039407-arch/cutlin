@@ -102,6 +102,7 @@ function stageSub(st) {
 
 const STAGE_NAMES_ZH = {
   idea: "创意", proposal: "提案", research: "调研", script: "脚本",
+  storyboard: "分镜", character: "角色定妆", shots: "逐镜生成", assembly: "组装合成",
   scene_plan: "场景规划", character_design: "角色设计", rig_plan: "绑定规划",
   assets: "素材生成", real_capture: "实拍采集", synthetic_terminal: "合成终端",
   edit: "剪辑", compose: "合成", qa: "质检", render: "渲染", publish: "发布", sample: "抽样",
