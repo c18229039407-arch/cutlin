@@ -694,3 +694,69 @@ def probe_output(path: Path) -> dict[str, Any]:
     except Exception:
         pass
     return info
+
+
+def run_fal_queue_job(
+    model_path: str,
+    payload: dict,
+    api_key: str,
+    output_path,
+    poll_interval: float = 5.0,
+    timeout_seconds: float = 600.0,
+):
+    """Submit a job to fal.ai's queue API, poll to completion, download the video.
+
+    Returns (ok: bool, info: dict|str). On success info holds the parsed
+    response plus the saved path; on failure info is an error string.
+    Shared by the fal-backed video tools (kling, wan-cloud, ltx-2, pixverse…).
+    """
+    import time as _time
+    from pathlib import Path as _Path
+
+    import requests
+
+    headers = {"Authorization": f"Key {api_key}"}
+    json_headers = {**headers, "Content-Type": "application/json"}
+
+    try:
+        submit = requests.post(
+            f"https://queue.fal.run/fal-ai/{model_path}",
+            headers=json_headers,
+            json=payload,
+            timeout=30,
+        )
+        submit.raise_for_status()
+        queue_data = submit.json()
+        status_url = queue_data["status_url"]
+        response_url = queue_data["response_url"]
+
+        deadline = _time.time() + timeout_seconds
+        while True:
+            if _time.time() > deadline:
+                return False, f"fal job timed out after {timeout_seconds:.0f}s"
+            _time.sleep(poll_interval)
+            status_resp = requests.get(status_url, headers=headers, timeout=15)
+            status_resp.raise_for_status()
+            status = status_resp.json().get("status", "UNKNOWN")
+            if status == "COMPLETED":
+                break
+            if status in ("FAILED", "CANCELLED"):
+                return False, f"fal job {status.lower()}"
+
+        result = requests.get(response_url, headers=headers, timeout=30).json()
+        # Validation errors surface as a COMPLETED job whose body carries `detail`
+        if isinstance(result, dict) and result.get("detail"):
+            return False, f"fal validation error: {result['detail']}"
+
+        video_url = (result.get("video") or {}).get("url")
+        if not video_url:
+            return False, f"fal job completed but returned no video url: {str(result)[:200]}"
+
+        blob = requests.get(video_url, timeout=180)
+        blob.raise_for_status()
+        out = _Path(output_path)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(blob.content)
+        return True, {"result": result, "path": str(out)}
+    except Exception as exc:  # noqa: BLE001
+        return False, f"fal queue request failed: {exc}"
