@@ -130,7 +130,7 @@ The **[Prompt Gallery](PROMPT_GALLERY.md)** holds field-tested prompts with cost
 
 ## The capability map
 
-### Twelve pipelines
+### Thirteen pipelines
 
 | Reach for it when | Pipeline | What lands in your folder |
 |----------|----------|-----------------|
@@ -145,6 +145,8 @@ The **[Prompt Gallery](PROMPT_GALLERY.md)** holds field-tested prompts with cost
 | promoting a show, visualizing audio | **Podcast Repurpose** | highlight moments turned into video |
 | feature demos, walkthroughs, docs | **Screen Demo** | polished software screen recordings |
 | talks, vlogs, interviews | **Talking Head** | presenter-led videos built around real people on camera |
+| cartoon-character shorts | **Character Animation** | locally performed animation on rigged SVG characters |
+| minute-scale multi-shot commercials | **Storyboard Ad** | character kits -> per-shot generation -> unified-grade assembly |
 
 All of them ride one skeleton: `idea → research → script → scene plan → assets → edit → compose`. A Markdown **director skill** governs each stage — goals, method, acceptance bar; the agent follows it, self-checks, writes checkpoints, and halts at creative forks for your sign-off. Research is non-negotiable: 15–25 live searches across YouTube, Reddit, news, and academic sources before a word of script exists.
 
@@ -238,9 +240,9 @@ VIDEO_GEN_LOCAL_MODEL=wan2.1-1.3b  # swap in wan2.1-14b / hunyuan-1.5 / ltx2-loc
 
 ## Why it earns the pick
 
-- **Twelve pipelines, fully staffed** — explainer, talking head, screen capture, trailer, animation, podcast repurposing, dubbing, and real-footage montage all ship ready to run
-- **Fifty-two registered tools** — generation for video and stills, voice, scoring, mixing, captions, enhancement, and content understanding
-- **Four hundred-plus skill files** — production standards, per-stage directors, creative playbooks, QA checklists, and deep-dive manuals that turn "can call the tool" into "uses it well"
+- **Thirteen pipelines, fully staffed** — explainer, talking head, screen capture, trailer, animation, podcast repurposing, dubbing, real-footage montage, and storyboard-driven minute-scale ads all ship ready to run
+- **Ninety-six registered tools** — generation for video and stills, voice, scoring, mixing, captions, enhancement, and content understanding (registry-counted)
+- **Seven-hundred-plus skill files** — production standards, per-stage directors, creative playbooks, QA checklists, and deep-dive manuals that turn "can call the tool" into "uses it well"
 - **A reference clip is a valid brief** — hand over a video you admire, get back a plan that is grounded yet distinct
 - **Genuine films without buying a video model** — cut from real footage in free and open archives
 - **Nobody locks you in** — vendors hot-swap freely, auto-ranked across seven axes
