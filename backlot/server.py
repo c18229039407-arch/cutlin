@@ -277,6 +277,14 @@ def create_app() -> FastAPI:
     if UI_DIR.is_dir():
         app.mount("/ui", StaticFiles(directory=UI_DIR), name="ui")
 
+    # Cutting Room lives next to composition assets so its relative media
+    # paths resolve; mounting is read-only (GET), so the Studio's
+    # never-writes philosophy is untouched — the panel edits client-side
+    # and hands changes back as a downloaded props JSON.
+    composer_public = UI_DIR.parent.parent / "remotion-composer" / "public"
+    if composer_public.is_dir():
+        app.mount("/composer", StaticFiles(directory=composer_public), name="composer")
+
     return app
 
 

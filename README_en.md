@@ -82,6 +82,18 @@ The board is read-only: it watches `projects/` and streams over SSE, never steer
 
 ---
 
+### The Cutting Room
+
+Last-mile tweaks after a render don't need a conversation round-trip: open
+`remotion-composer/public/cutting-room.html` (or hit "✂ 剪辑室" in the Studio
+library header) for a three-track timeline panel — edge-trim cuts with
+automatic ripple so they stay contiguous, drag overlays, edit copy,
+transitions, and track volumes, and scrub an approximate preview. It edits
+the props declaration, not pixels: export `props-edited.json` and re-render
+through the pipeline, so the declaration stays the single source of truth
+and every gate still applies.
+
+
 ## A clip you admire is a valid brief
 
 Skip the blank-prompt anxiety. Hand Cutlin a **YouTube video, Short, Reel, TikTok link, or a local file** and it reverse-engineers the piece into a buildable blueprint:
