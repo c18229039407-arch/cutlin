@@ -43,6 +43,21 @@ make setup   # = Python deps + Remotion + piper-tts + a fresh .env
 > ```
 > If `npm install` throws `ERR_INVALID_ARG_TYPE`, retry with `npx --yes npm install`.
 
+Once installed, run the doctor before your first render rather than
+discovering a gap halfway through one:
+
+```bash
+make doctor       # check runtime, fonts, keys and the tool pool — diagnose only
+make configure    # interactive key setup; every key is probed live as you enter it
+```
+
+`make doctor` surfaces the failures a local install makes **silently**: a key
+that authenticates but belongs to the wrong project, a TTS config missing its
+voice id, a font CDN your network cannot reach so the render quietly falls
+back, and the difference between "this tool is broken" and "this tool has no
+key". Every probe is free.
+
+
 Open the folder with your coding assistant and brief it like a producer:
 
 ```

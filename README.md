@@ -43,6 +43,16 @@ make setup   # = Python 依赖 + Remotion + piper-tts + 生成 .env
 > ```
 > 若 `npm install` 抛 `ERR_INVALID_ARG_TYPE`，换 `npx --yes npm install` 再试。
 
+装好之后先体检一遍，别等渲染到一半才发现缺东西：
+
+```bash
+make doctor       # 检查运行时、字体、密钥、工具池，只诊断不修改
+make configure    # 交互式配置供应商密钥，每输入一把当场联网验证
+```
+
+`make doctor` 会把本地安装里那些**不报错的坑**挖出来：认证通过但挂错项目的密钥、缺音色 ID 的语音配置、网络不通导致静默回退的字体 CDN、以及"到底是工具坏了还是没配密钥"。所有密钥验证都是免费的。
+
+
 装好后，用 AI 助手打开这个目录，像跟制片人说话一样下需求：
 
 ```

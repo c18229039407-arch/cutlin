@@ -97,6 +97,15 @@ test-contracts: ensure-venv
 
 # ---- Utilities ----
 
+doctor: ensure-venv
+	@$(RUN_PYTHON) scripts/doctor.py
+
+doctor-offline: ensure-venv
+	@$(RUN_PYTHON) scripts/doctor.py --offline
+
+configure: ensure-venv
+	@$(RUN_PYTHON) scripts/doctor.py --configure
+
 preflight: ensure-venv
 	$(RUN_PYTHON) -c "from tools.tool_registry import registry; import json; registry.discover(); print(json.dumps(registry.provider_menu(), indent=2))"
 
