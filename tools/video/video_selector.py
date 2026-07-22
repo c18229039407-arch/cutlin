@@ -212,7 +212,9 @@ class VideoSelector(BaseTool):
         return tool.estimate_runtime(inputs) if tool else 0.0
 
     def execute(self, inputs: dict[str, object]) -> ToolResult:
-        from lib.scoring import rank_providers
+        # Video uses the 8-axis scene-weighted ranker (see lib/scoring.py);
+        # image and TTS selection stay on the generic 7-axis ProviderScore.
+        from lib.scoring import rank_video_providers as rank_providers
 
         candidates = self._providers()
 
@@ -282,7 +284,8 @@ class VideoSelector(BaseTool):
         Respects preferred_provider and environment hints as tie-breakers,
         but the scoring engine drives the primary selection.
         """
-        from lib.scoring import rank_providers, ProviderScore
+        from lib.scoring import rank_video_providers as rank_providers
+        from lib.scoring import VideoProviderScore as ProviderScore
 
         preferred = inputs.get("preferred_provider", "auto")
         allowed = set(inputs.get("allowed_providers") or [])

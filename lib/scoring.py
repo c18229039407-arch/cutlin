@@ -554,3 +554,402 @@ def format_ranking(rankings: list[ProviderScore], top_n: int = 5) -> str:
             f"cost={r.cost_efficiency:.1f}]"
         )
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Video-specific 8-dimension scoring (scene-weighted)
+# ---------------------------------------------------------------------------
+#
+# The generic 7-axis ProviderScore above stays in place for image and TTS
+# selection. Video generation gets its own axes because three of them
+# (motion stability, physical accuracy, audio capability) are meaningless
+# for stills and speech, and because provider quality on video is now well
+# documented by public review/benchmark data in a way it is not elsewhere.
+#
+# Weight tables are per-scene: an e-commerce ad and a documentary do not
+# want the same provider even at identical quality.
+
+VIDEO_DIMENSIONS: tuple[str, ...] = (
+    "prompt_following",     # 提示词跟随
+    "motion_stability",     # 运动稳定
+    "visual_quality",       # 视觉质量
+    "physical_accuracy",    # 物理准确性
+    "subject_consistency",  # 主体一致性
+    "controllability",      # 可控性
+    "audio_capability",     # 音频能力
+    "engineering",          # 工程维度 (cost + reliability + billing trust + availability)
+)
+
+VIDEO_DIMENSION_LABELS_ZH: dict[str, str] = {
+    "prompt_following": "提示词跟随",
+    "motion_stability": "运动稳定",
+    "visual_quality": "视觉质量",
+    "physical_accuracy": "物理准确性",
+    "subject_consistency": "主体一致性",
+    "controllability": "可控性",
+    "audio_capability": "音频能力",
+    "engineering": "工程维度",
+}
+
+# Scene weight tables. Each must sum to 1.0.
+# ecommerce_ad / brand_tvc / documentary / social_short are authored.
+# "general" is the arithmetic mean of the four, used when the brief does not
+# clearly match a named scene — it is derived, not authored.
+VIDEO_SCENE_WEIGHTS: dict[str, dict[str, float]] = {
+    "ecommerce_ad": {
+        "subject_consistency": 0.25,
+        "engineering": 0.25,
+        "prompt_following": 0.15,
+        "controllability": 0.15,
+        "visual_quality": 0.10,
+        "motion_stability": 0.06,
+        "physical_accuracy": 0.02,
+        "audio_capability": 0.02,
+    },
+    "brand_tvc": {
+        "subject_consistency": 0.20,
+        "engineering": 0.10,
+        "prompt_following": 0.15,
+        "controllability": 0.20,
+        "visual_quality": 0.20,
+        "motion_stability": 0.10,
+        "physical_accuracy": 0.03,
+        "audio_capability": 0.02,
+    },
+    "documentary": {
+        "subject_consistency": 0.15,
+        "engineering": 0.15,
+        "prompt_following": 0.10,
+        "controllability": 0.10,
+        "visual_quality": 0.15,
+        "motion_stability": 0.10,
+        "physical_accuracy": 0.20,
+        "audio_capability": 0.05,
+    },
+    "social_short": {
+        "subject_consistency": 0.10,
+        "engineering": 0.20,
+        "prompt_following": 0.15,
+        "controllability": 0.10,
+        "visual_quality": 0.15,
+        "motion_stability": 0.15,
+        "physical_accuracy": 0.05,
+        "audio_capability": 0.10,
+    },
+    "general": {
+        "subject_consistency": 0.175,
+        "engineering": 0.175,
+        "prompt_following": 0.1375,
+        "controllability": 0.1375,
+        "visual_quality": 0.15,
+        "motion_stability": 0.1025,
+        "physical_accuracy": 0.075,
+        "audio_capability": 0.0475,
+    },
+}
+
+# Keywords that route a brief to a scene weight table.
+_VIDEO_SCENE_KEYWORDS: dict[str, set[str]] = {
+    "ecommerce_ad": {
+        "ecommerce", "e-commerce", "product", "listing", "shop", "store",
+        "commerce", "retail", "sku", "unboxing", "conversion", "ad", "ads",
+        "advertisement", "promo", "promotion",
+    },
+    "brand_tvc": {
+        "tvc", "brand", "cinematic", "film", "movie", "trailer", "dramatic",
+        "epic", "campaign", "hero", "commercial",
+    },
+    "documentary": {
+        "documentary", "realistic", "photorealistic", "lifelike", "natural",
+        "interview", "news", "journalism", "archival", "historical", "nature",
+    },
+    "social_short": {
+        "social", "tiktok", "instagram", "reels", "shorts", "viral", "meme",
+        "ugc", "vertical", "feed",
+    },
+}
+
+# Per-provider baseline scores.
+#
+# Source: reviewed 2026-07 against public user-review sentiment (Trustpilot,
+# Reddit, Product Hunt, hands-on tested reviews) cross-checked with public
+# benchmarks (VBench / VBench-2.0, Artificial Analysis Elo). See
+# skills/core/video-provider-scores.md for per-cell provenance, confidence
+# levels, and the vendor-claim-vs-user-report conflicts found.
+#
+# `confidence`: high | medium | low — low means benchmark/vendor sourced with
+# little independent user corroboration; the ranker discounts it.
+# `status`: available | restricted | deprecated — procurement reality, folded
+# into the engineering axis rather than silently ignored.
+VIDEO_PROVIDER_BASELINE: dict[str, dict[str, Any]] = {
+    "kling": {
+        "prompt_following": 0.82, "motion_stability": 0.85, "visual_quality": 0.86,
+        "physical_accuracy": 0.72, "subject_consistency": 0.72, "controllability": 0.88,
+        "audio_capability": 0.75, "engineering": 0.45,
+        "confidence": "high", "status": "available",
+    },
+    "veo": {
+        "prompt_following": 0.88, "motion_stability": 0.82, "visual_quality": 0.88,
+        "physical_accuracy": 0.70, "subject_consistency": 0.78, "controllability": 0.80,
+        "audio_capability": 0.90, "engineering": 0.60,
+        "confidence": "high", "status": "available",
+    },
+    "minimax": {
+        "prompt_following": 0.80, "motion_stability": 0.86, "visual_quality": 0.82,
+        "physical_accuracy": 0.74, "subject_consistency": 0.72, "controllability": 0.60,
+        "audio_capability": 0.20, "engineering": 0.45,
+        "confidence": "high", "status": "available",
+    },
+    "wan": {
+        "prompt_following": 0.78, "motion_stability": 0.78, "visual_quality": 0.82,
+        "physical_accuracy": 0.68, "subject_consistency": 0.72, "controllability": 0.80,
+        "audio_capability": 0.15, "engineering": 0.70,
+        "confidence": "medium", "status": "available",
+    },
+    "ltx": {
+        "prompt_following": 0.72, "motion_stability": 0.72, "visual_quality": 0.80,
+        "physical_accuracy": 0.60, "subject_consistency": 0.62, "controllability": 0.75,
+        "audio_capability": 0.82, "engineering": 0.72,
+        "confidence": "medium", "status": "available",
+    },
+    "pixverse": {
+        "prompt_following": 0.76, "motion_stability": 0.74, "visual_quality": 0.76,
+        "physical_accuracy": 0.62, "subject_consistency": 0.66, "controllability": 0.72,
+        "audio_capability": 0.55, "engineering": 0.42,
+        "confidence": "high", "status": "available",
+    },
+    "runway": {
+        "prompt_following": 0.78, "motion_stability": 0.80, "visual_quality": 0.84,
+        "physical_accuracy": 0.68, "subject_consistency": 0.80, "controllability": 0.85,
+        "audio_capability": 0.30, "engineering": 0.40,
+        "confidence": "high", "status": "available",
+    },
+    "seedance": {
+        "prompt_following": 0.90, "motion_stability": 0.88, "visual_quality": 0.88,
+        "physical_accuracy": 0.80, "subject_consistency": 0.85, "controllability": 0.85,
+        "audio_capability": 0.82, "engineering": 0.30,
+        "confidence": "medium", "status": "restricted",  # overseas API suspended 2026-03
+    },
+    "luma": {
+        "prompt_following": 0.74, "motion_stability": 0.76, "visual_quality": 0.82,
+        "physical_accuracy": 0.66, "subject_consistency": 0.70, "controllability": 0.78,
+        "audio_capability": 0.35, "engineering": 0.50,
+        "confidence": "medium", "status": "available",
+    },
+    "happyhorse": {
+        "prompt_following": 0.88, "motion_stability": 0.86, "visual_quality": 0.88,
+        "physical_accuracy": 0.78, "subject_consistency": 0.84, "controllability": 0.80,
+        "audio_capability": 0.85, "engineering": 0.35,
+        "confidence": "low", "status": "restricted",  # public API not broadly available
+    },
+    "openai": {  # Sora 2
+        "prompt_following": 0.85, "motion_stability": 0.84, "visual_quality": 0.86,
+        "physical_accuracy": 0.76, "subject_consistency": 0.82, "controllability": 0.72,
+        "audio_capability": 0.80, "engineering": 0.15,
+        "confidence": "medium", "status": "deprecated",  # API shutdown 2026-09-24
+    },
+    "vidu": {
+        "prompt_following": 0.78, "motion_stability": 0.76, "visual_quality": 0.78,
+        "physical_accuracy": 0.64, "subject_consistency": 0.80, "controllability": 0.78,
+        "audio_capability": 0.80, "engineering": 0.38,
+        "confidence": "medium", "status": "available",
+    },
+}
+
+# Providers whose scores are unreviewed get derived scores; low-confidence and
+# non-available providers get their weighted score discounted so the ranker
+# does not hand a production shot to something we cannot actually buy.
+_CONFIDENCE_MULTIPLIER = {"high": 1.0, "medium": 0.97, "low": 0.90, "derived": 0.92}
+_STATUS_MULTIPLIER = {"available": 1.0, "restricted": 0.75, "deprecated": 0.40}
+
+
+@dataclass
+class VideoProviderScore:
+    """8-axis, scene-weighted evaluation of a video generation provider."""
+
+    tool_name: str
+    provider: str
+    scene: str = "general"
+    prompt_following: float = 0.0
+    motion_stability: float = 0.0
+    visual_quality: float = 0.0
+    physical_accuracy: float = 0.0
+    subject_consistency: float = 0.0
+    controllability: float = 0.0
+    audio_capability: float = 0.0
+    engineering: float = 0.0
+    confidence: str = "derived"
+    status: str = "available"
+    data_source: str = "derived"  # "reviewed" when from VIDEO_PROVIDER_BASELINE
+
+    @property
+    def raw_score(self) -> float:
+        """Scene-weighted score before confidence/status discounts."""
+        weights = VIDEO_SCENE_WEIGHTS.get(self.scene, VIDEO_SCENE_WEIGHTS["general"])
+        return sum(getattr(self, dim) * weights[dim] for dim in VIDEO_DIMENSIONS)
+
+    @property
+    def weighted_score(self) -> float:
+        """Final score: scene weights, discounted for data confidence and
+        procurement status. Named to match ProviderScore so callers that only
+        sort on `.weighted_score` work unchanged."""
+        penalty = _CONFIDENCE_MULTIPLIER.get(self.confidence, 0.92)
+        penalty *= _STATUS_MULTIPLIER.get(self.status, 1.0)
+        return self.raw_score * penalty
+
+    def to_dict(self) -> dict[str, Any]:
+        d = asdict(self)
+        d["raw_score"] = self.raw_score
+        d["weighted_score"] = self.weighted_score
+        return d
+
+    def explain(self) -> str:
+        weights = VIDEO_SCENE_WEIGHTS.get(self.scene, VIDEO_SCENE_WEIGHTS["general"])
+        parts = [
+            f"{self.tool_name} ({self.provider}): {self.weighted_score:.3f} "
+            f"[scene={self.scene} source={self.data_source} "
+            f"confidence={self.confidence} status={self.status}]"
+        ]
+        contributions = sorted(
+            ((dim, getattr(self, dim), weights[dim]) for dim in VIDEO_DIMENSIONS),
+            key=lambda x: x[1] * x[2],
+            reverse=True,
+        )
+        for dim, val, weight in contributions[:3]:
+            label = VIDEO_DIMENSION_LABELS_ZH.get(dim, dim)
+            parts.append(f"  {dim} ({label})={val:.2f} × w={weight:.3f}")
+        if self.status != "available":
+            parts.append(f"  ! procurement status: {self.status}")
+        return "\n".join(parts)
+
+
+def detect_video_scene(task_context: dict[str, Any]) -> str:
+    """Pick a scene weight table from the brief.
+
+    Matches intent text and style keywords against per-scene vocabularies and
+    returns the best-matching scene, or "general" when nothing matches
+    clearly. An explicit task_context["scene"] always wins.
+    """
+    explicit = task_context.get("scene")
+    if explicit in VIDEO_SCENE_WEIGHTS:
+        return str(explicit)
+
+    words = set(_tokenize_text(str(task_context.get("intent", ""))))
+    for kw in task_context.get("style_keywords", []) or []:
+        words.update(_tokenize_text(str(kw)))
+    if not words:
+        return "general"
+
+    hits = {
+        scene: len(words & vocab)
+        for scene, vocab in _VIDEO_SCENE_KEYWORDS.items()
+    }
+    best_scene = max(hits, key=lambda s: hits[s])
+    return best_scene if hits[best_scene] > 0 else "general"
+
+
+def _derive_video_scores(tool, task_context: dict[str, Any]) -> dict[str, float]:
+    """Derive 8-axis scores for a provider with no reviewed baseline.
+
+    Uses only what the tool actually declares, so a newly added provider
+    still ranks instead of crashing — but it is marked data_source="derived"
+    and discounted, because declared capability is not measured quality.
+    """
+    supports = getattr(tool, "supports", {}) or {}
+    best_for = set(getattr(tool, "best_for", []) or [])
+    intent = str(task_context.get("intent", ""))
+    style_keywords = set(task_context.get("style_keywords", []) or [])
+
+    audio = 0.15
+    if supports.get("native_audio"):
+        audio = 0.6
+    if supports.get("dialogue_generation"):
+        audio = max(audio, 0.8)
+    if supports.get("ambient_sound"):
+        audio = max(audio, 0.7)
+
+    consistency = 0.5
+    if supports.get("reference_to_video"):
+        consistency = 0.7
+    if supports.get("first_last_frame_to_video"):
+        consistency = max(consistency, 0.72)
+
+    return {
+        "prompt_following": _compute_task_fit(best_for, intent, style_keywords),
+        "motion_stability": 0.5,
+        "visual_quality": 0.7 if supports.get("cinematic_quality") else 0.5,
+        # VBench-2.0: most models score under 60% on physics tasks — a neutral
+        # prior here is generous, not pessimistic.
+        "physical_accuracy": 0.45,
+        "subject_consistency": consistency,
+        "controllability": _compute_control(supports),
+        "audio_capability": audio,
+        "engineering": 0.5,
+    }
+
+
+def score_video_provider(tool, task_context: dict[str, Any]) -> VideoProviderScore:
+    """Score one video tool on the 8 video axes for this brief."""
+    provider = str(getattr(tool, "provider", "") or "").lower()
+    scene = detect_video_scene(task_context)
+    baseline = VIDEO_PROVIDER_BASELINE.get(provider)
+
+    if baseline:
+        scores = {dim: float(baseline[dim]) for dim in VIDEO_DIMENSIONS}
+        confidence = str(baseline.get("confidence", "medium"))
+        status = str(baseline.get("status", "available"))
+        data_source = "reviewed"
+    else:
+        scores = _derive_video_scores(tool, task_context)
+        confidence = "derived"
+        status = "available"
+        data_source = "derived"
+
+    # The engineering axis blends the vendor-level baseline (billing trust,
+    # support, API maturity) with this call's live budget fit, so a provider
+    # that is generally fine but too expensive right now still gets marked
+    # down. 60/40 keeps the reviewed signal dominant.
+    try:
+        estimated_cost = float(tool.estimate_cost(task_context.get("inputs", {}) or {}))
+    except Exception:  # noqa: BLE001 - tools may reject partial inputs
+        estimated_cost = 0.0
+    live_cost = _compute_cost_efficiency(
+        estimated_cost, task_context.get("budget_remaining")
+    )
+    scores["engineering"] = scores["engineering"] * 0.6 + live_cost * 0.4
+
+    return VideoProviderScore(
+        tool_name=getattr(tool, "name", "unknown"),
+        provider=provider or "unknown",
+        scene=scene,
+        confidence=confidence,
+        status=status,
+        data_source=data_source,
+        **scores,
+    )
+
+
+def rank_video_providers(
+    tools: list,
+    task_context: dict[str, Any],
+) -> list[VideoProviderScore]:
+    """Rank video tools on the 8 video axes, best-first."""
+    scores = [score_video_provider(t, task_context) for t in tools]
+    return sorted(scores, key=lambda s: s.weighted_score, reverse=True)
+
+
+def format_video_ranking(
+    rankings: list[VideoProviderScore], top_n: int = 5
+) -> str:
+    """Format an 8-axis ranking for user presentation."""
+    lines = []
+    for i, r in enumerate(rankings[:top_n], 1):
+        flag = "" if r.status == "available" else f" [{r.status}]"
+        lines.append(
+            f"  {i}. {r.tool_name} ({r.provider}){flag} — {r.weighted_score:.3f} "
+            f"[prompt={r.prompt_following:.2f} motion={r.motion_stability:.2f} "
+            f"visual={r.visual_quality:.2f} physics={r.physical_accuracy:.2f} "
+            f"subject={r.subject_consistency:.2f} control={r.controllability:.2f} "
+            f"audio={r.audio_capability:.2f} eng={r.engineering:.2f}]"
+        )
+    return "\n".join(lines)
