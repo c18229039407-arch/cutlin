@@ -123,13 +123,23 @@ export function resolveTheme(props: Record<string, unknown>): ThemeConfig {
 const calculateMetadata: CalculateMetadataFunction<ExplainerProps> = async ({
   props,
 }) => {
+  // Delivery aspect ratio is a props-level decision, not a build-time one.
+  // Chinese marketplace listing videos (Taobao/Tmall/JD main-image slot) are
+  // 1:1 or 3:4, and vertical social placements are 9:16 — a composition
+  // hardcoded to 1920x1080 silently letterboxes or center-crops all of them.
+  // Defaults stay 1920x1080 so existing projects render unchanged.
+  const dimensions = {
+    width: typeof props.width === "number" ? props.width : 1920,
+    height: typeof props.height === "number" ? props.height : 1080,
+  };
+
   const cuts = props.cuts || [];
   if (cuts.length === 0) {
-    return { durationInFrames: 30 * 60 };
+    return { ...dimensions, durationInFrames: 30 * 60 };
   }
   const lastEnd = Math.max(...cuts.map((c) => c.out_seconds || 0));
   // Add 1 second padding for final fade
-  return { durationInFrames: Math.ceil((lastEnd + 1) * 30) };
+  return { ...dimensions, durationInFrames: Math.ceil((lastEnd + 1) * 30) };
 };
 
 export const Root: React.FC = () => {

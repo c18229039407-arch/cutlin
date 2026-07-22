@@ -308,6 +308,10 @@ export interface ExplainerProps {
   overlays?: Overlay[];
   captions?: WordCaption[];
   audio?: AudioConfig;
+  /** Delivery frame size. Defaults to 1920x1080; set 1080x1080 for
+   *  marketplace listing videos, 1080x1440 for 3:4, 1080x1920 for 9:16. */
+  width?: number;
+  height?: number;
 }
 
 // ---------------------------------------------------------------------------
